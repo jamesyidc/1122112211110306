@@ -8,7 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <!-- 🔥 强制版本更新 2026-03-04 -->
-    <meta name="version" content="3.8.1-20260306-positive-ratio-display-fix">
+    <meta name="version" content="3.8.2-20260306-positive-ratio-fixed">
     <meta http-equiv="last-modified" content="2026-03-06T02:45:00+08:00">
     <title>27币涨跌幅追踪系统 v3.8.1</title>
     
@@ -7146,7 +7146,10 @@ pm2 status                                                # 查看所有进程�
             try {
                 let url = `/api/coin-change-tracker/positive-ratio-stats?_t=${Date.now()}`;
                 if (date) {
-                    url += `&date=${formatDate(date)}`;
+                    // 如果date已经是字符串格式(YYYY-MM-DD)，直接使用；否则格式化
+                    const dateStr = (typeof date === 'string') ? date : formatDate(date);
+                    url += `&date=${dateStr}`;
+                    console.log('📅 使用日期参数:', dateStr);
                 }
                 
                 console.log('📡 正数占比API请求:', url);
