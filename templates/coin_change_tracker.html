@@ -7699,6 +7699,7 @@ pm2 status                                                # 查看所有进程�
                     
                     // 🔥 处理正数占比历史数据
                     let positiveRatioHistoryMap = {};  // 按时间索引的正数占比数据
+                    let positiveRatioValues = [];      // 🔥 正数占比数据数组（用于透明虚线）
                     try {
                         if (positiveRatioResult.success && positiveRatioResult.data) {
                             // 将数组转换为按时间索引的对象，方便tooltip查找
@@ -7713,17 +7714,36 @@ pm2 status                                                # 查看所有进程�
                             });
                             window.positiveRatioHistory = positiveRatioHistoryMap;
                             
+                            // 🔥 创建正数占比数值数组，与times时间轴对齐
+                            positiveRatioValues = times.map(time => {
+                                // 精确匹配
+                                if (positiveRatioHistoryMap[time]) {
+                                    return positiveRatioHistoryMap[time].positive_ratio;
+                                }
+                                // 分钟匹配
+                                const timeMinute = time.substring(0, 5);
+                                const matchingKey = Object.keys(positiveRatioHistoryMap).find(k => k.startsWith(timeMinute));
+                                if (matchingKey) {
+                                    return positiveRatioHistoryMap[matchingKey].positive_ratio;
+                                }
+                                return null;  // 没有匹配的数据
+                            });
+                            
                             console.log('✅ 正数占比历史数据加载成功:', {
                                 count: positiveRatioResult.data.length,
-                                sample: positiveRatioResult.data.slice(0, 3)
+                                sample: positiveRatioResult.data.slice(0, 3),
+                                valuesCount: positiveRatioValues.length,
+                                valuesSample: positiveRatioValues.slice(0, 5)
                             });
                         } else {
                             window.positiveRatioHistory = {};
+                            positiveRatioValues = times.map(() => null);
                             console.log('⚠️ 正数占比历史数据暂无数据');
                         }
                     } catch (e) {
                         console.warn('⚠️ 正数占比历史数据处理失败:', e);
                         window.positiveRatioHistory = {};
+                        positiveRatioValues = times.map(() => null);
                     }
                     
                     // 🚀 处理并行加载的波峰数据
@@ -8024,6 +8044,57 @@ pm2 status                                                # 查看所有进程�
                                         <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-top: 4px;">
                                             <span style="color: #6B7280;">波动状态:</span>
                                             <span style="font-weight: 600; color: ${velocityStatusColor};">${velocityStatus}</span>
+                                        </div>
+                                    </div>`;
+                                }
+                                
+                                // 🔥🔥🔥 显示正数占比数据（从透明虚线series获取）
+                                const positiveRatioParam = params.find(p => p.seriesName === '正数时段占比');
+                                if (positiveRatioParam && positiveRatioParam.value !== null && positiveRatioParam.value !== undefined) {
+                                    const positiveRatio = positiveRatioParam.value;
+                                    
+                                    // 根据正数占比设置颜色和状态
+                                    let ratioColor = '#EF4444';  // 红色（默认）
+                                    let ratioStatus = '大幅下跌';
+                                    if (positiveRatio > 60) {
+                                        ratioColor = '#10B981';  // 绿色
+                                        ratioStatus = '强势上涨';
+                                    } else if (positiveRatio > 50) {
+                                        ratioColor = '#3B82F6';  // 蓝色
+                                        ratioStatus = '偏多';
+                                    } else if (positiveRatio > 40) {
+                                        ratioColor = '#F59E0B';  // 橙色
+                                        ratioStatus = '偏空';
+                                    }
+                                    
+                                    // 从window.positiveRatioHistory获取详细数据
+                                    let positiveCount = '--';
+                                    let totalCount = '--';
+                                    if (window.positiveRatioHistory) {
+                                        const timeMinute = time.substring(0, 5);
+                                        let ratioData = window.positiveRatioHistory[time];
+                                        if (!ratioData) {
+                                            const matchingKey = Object.keys(window.positiveRatioHistory).find(k => k.startsWith(timeMinute));
+                                            if (matchingKey) {
+                                                ratioData = window.positiveRatioHistory[matchingKey];
+                                            }
+                                        }
+                                        if (ratioData) {
+                                            positiveCount = ratioData.positive_count;
+                                            totalCount = ratioData.total_count;
+                                        }
+                                    }
+                                    
+                                    html += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #E5E7EB;">
+                                        <div style="margin-bottom: 4px;">
+                                            <i class="fas fa-chart-line" style="margin-right: 4px; color: ${ratioColor};"></i><span style="font-weight: 600; color: ${ratioColor};">正数时段占比</span>
+                                        </div>
+                                        <div style="font-size: 14px; font-weight: bold; color: ${ratioColor};">
+                                            ${positiveRatio.toFixed(1)}% ${ratioStatus}
+                                        </div>
+                                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-top: 4px;">
+                                            <span style="color: #6B7280;">时段统计:</span>
+                                            <span style="font-weight: 600;">${positiveCount}/${totalCount} 时段</span>
                                         </div>
                                     </div>`;
                                 }
@@ -8850,6 +8921,32 @@ pm2 status                                                # 查看所有进程�
                                     shadowBlur: 10,
                                     shadowColor: 'rgba(249, 115, 22, 0.5)'
                                 }
+                            }
+                        },
+                        // 🔥🔥🔥 新增：正数占比透明虚线（仅用于tooltip显示，不可见）
+                        {
+                            id: 'positive-ratio-line',
+                            name: '正数时段占比',
+                            type: 'line',
+                            yAxisIndex: 0,  // 使用左侧Y轴（与涨跌幅共用，但数值范围0-100）
+                            smooth: false,
+                            data: positiveRatioValues.length > 0 ? positiveRatioValues : [],
+                            lineStyle: {
+                                width: 0,  // 线宽为0，完全不可见
+                                type: 'dashed',
+                                color: 'rgba(0,0,0,0)',  // 完全透明
+                                opacity: 0
+                            },
+                            itemStyle: {
+                                color: 'rgba(0,0,0,0)',  // 完全透明
+                                opacity: 0
+                            },
+                            showSymbol: false,  // 不显示数据点
+                            connectNulls: true,
+                            silent: true,  // 不响应鼠标事件
+                            z: 0,  // 最低层级
+                            emphasis: {
+                                disabled: true  // 禁用高亮
                             }
                         },
                         // 独立的市场情绪信号系列（不受图例切换影响）
