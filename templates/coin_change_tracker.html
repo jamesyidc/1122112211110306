@@ -5308,8 +5308,7 @@ pm2 status                                                # 查看所有进程�
                                 html += `上涨占比: <span style="font-weight: 600; color: #10B981;">${upRatio}</span>`;
                                 html += `</div>`;
                                 
-                                // 🔥 显示当前时间点的正数/负数状态（而不是全天汇总）
-                                // DEBUG: 添加调试日志
+                                // 🔥 显示当前时间点的正数占比（从00:00到当前时间的累计占比）
                                 console.log('🔍 Tooltip formatter - 检查正数占比数据:');
                                 console.log('  当前时间:', time);
                                 console.log('  window.positiveRatioHistory存在:', window.positiveRatioHistory !== undefined);
@@ -5318,15 +5317,35 @@ pm2 status                                                # 查看所有进程�
                                     console.log('  ✅ 找到时间点数据:', window.positiveRatioHistory[time]);
                                     
                                     const ratioData = window.positiveRatioHistory[time];
-                                    const isPositive = ratioData.is_positive;
-                                    const totalChange = ratioData.total_change;
+                                    const positiveRatio = ratioData.positive_ratio;  // 累计正数占比
+                                    const positiveCount = ratioData.positive_count;   // 正数时段数
+                                    const totalCount = ratioData.total_count;         // 总时段数
+                                    const isPositive = ratioData.is_positive;         // 当前时刻是否为正
+                                    const totalChange = ratioData.total_change;       // 当前时刻的涨跌幅
+                                    
+                                    // 根据正数占比设置颜色
+                                    let ratioColor = '#EF4444';  // 红色（默认）
+                                    let ratioStatus = '大幅下跌';
+                                    if (positiveRatio > 60) {
+                                        ratioColor = '#10B981';  // 绿色
+                                        ratioStatus = '强势上涨';
+                                    } else if (positiveRatio > 50) {
+                                        ratioColor = '#3B82F6';  // 蓝色
+                                        ratioStatus = '偏多';
+                                    } else if (positiveRatio > 40) {
+                                        ratioColor = '#F59E0B';  // 橙色
+                                        ratioStatus = '偏空';
+                                    }
                                     
                                     html += `<div style="margin-top: 6px; padding: 6px; background: #F3F4F6; border-radius: 4px;">`;
                                     html += `<div style="font-size: 12px; color: #6B7280; margin-bottom: 2px;">`;
-                                    html += `<i class="fas fa-chart-line" style="margin-right: 4px;"></i>涨跌幅状态`;
+                                    html += `<i class="fas fa-chart-line" style="margin-right: 4px;"></i>正数时段占比`;
                                     html += `</div>`;
-                                    html += `<div style="font-size: 14px; font-weight: bold; color: ${isPositive ? '#10B981' : '#EF4444'};">`;
-                                    html += `${isPositive ? '✅ 正数' : '❌ 负数'} (${totalChange > 0 ? '+' : ''}${totalChange.toFixed(2)}%)`;
+                                    html += `<div style="font-size: 14px; font-weight: bold; color: ${ratioColor};">`;
+                                    html += `${positiveRatio.toFixed(1)}% ${ratioStatus}`;
+                                    html += `</div>`;
+                                    html += `<div style="font-size: 11px; color: #9CA3AF; margin-top: 2px;">`;
+                                    html += `${positiveCount}/${totalCount} 时段`;
                                     html += `</div>`;
                                     html += `</div>`;
                                 } else {
@@ -7655,7 +7674,10 @@ pm2 status                                                # 查看所有进程�
                             positiveRatioResult.data.forEach(item => {
                                 positiveRatioHistoryMap[item.time] = {
                                     total_change: item.total_change,
-                                    is_positive: item.is_positive
+                                    is_positive: item.is_positive,
+                                    positive_ratio: item.positive_ratio,      // 🔥 累计正数占比
+                                    positive_count: item.positive_count,       // 🔥 正数时段数
+                                    total_count: item.total_count              // 🔥 总时段数
                                 };
                             });
                             window.positiveRatioHistory = positiveRatioHistoryMap;

@@ -25151,8 +25151,10 @@ def get_positive_ratio_history():
                 'error': f'涨跌数据文件不存在: {file_date_str}'
             })
         
-        # 读取所有数据，构建时间序列
+        # 读取所有数据，构建时间序列，同时计算累计正数占比
         ratio_data = []
+        positive_count = 0
+        total_count = 0
         
         with open(coin_change_file, 'r') as f:
             lines = f.readlines()
@@ -25168,10 +25170,21 @@ def get_positive_ratio_history():
                     else:
                         time_only = timestamp
                     
+                    # 累计统计
+                    total_count += 1
+                    if total_change > 0:
+                        positive_count += 1
+                    
+                    # 计算到当前时间点的累计正数占比
+                    current_ratio = (positive_count / total_count) * 100 if total_count > 0 else 0
+                    
                     ratio_data.append({
                         'time': time_only,
                         'total_change': round(total_change, 2),
-                        'is_positive': total_change > 0
+                        'is_positive': total_change > 0,
+                        'positive_ratio': round(current_ratio, 2),  # 🔥 新增：累计正数占比
+                        'positive_count': positive_count,
+                        'total_count': total_count
                     })
         
         response = jsonify({
