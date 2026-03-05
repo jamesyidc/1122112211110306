@@ -7430,8 +7430,8 @@ pm2 status                                                # 查看所有进程�
                             console.warn('日内模式数据加载失败:', e);
                             return {success: false};
                         }),
-                        // 7. 🔥 正数占比历史数据（用于tooltip显示）
-                        fetch(`/api/coin-change-tracker/positive-ratio-history?${date ? 'date=' + currentDate + '&' : ''}_t=${Date.now()}`, {
+                        // 7. 🔥 正数占比历史数据（用于tooltip显示）- 使用currentDate确保日期一致
+                        fetch(`/api/coin-change-tracker/positive-ratio-history?date=${currentDate}&_t=${Date.now()}`, {
                             cache: 'no-store',
                             headers: {
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
