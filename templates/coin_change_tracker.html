@@ -7,9 +7,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <!-- 🔥 强制版本更新 2026-03-06 04:15 -->
-    <meta name="version" content="3.9.2-20260306-minute-matching-final">
-    <meta http-equiv="last-modified" content="2026-03-06T04:15:00+08:00">
+    <!-- 🔥🔥🔥 FINAL VERSION - FORCE CACHE BUST 2026-03-06 04:30 -->
+    <meta name="version" content="3.9.2-FINAL-FORCE-RELOAD-V9">
+    <meta http-equiv="last-modified" content="2026-03-06T04:30:00+08:00">
     <title>27币涨跌幅追踪系统 v3.9.2</title>
     
     <!-- 🔥 立即清除所有缓存和Service Worker -->
@@ -48,7 +48,7 @@
             });
         }
         
-        console.log('🔥 缓存清理脚本已执行 - v3.9.2');
+        console.log('🔥🔥🔥🔥🔥 缓存清理脚本已执行 - v3.9.2-FINAL-V9 - 加载时间:', new Date().toLocaleString('zh-CN', {timeZone: 'Asia/Shanghai'}));
     })();
     </script>
     <!-- 
@@ -5271,6 +5271,9 @@ pm2 status                                                # 查看所有进程�
                         }
                     },
                     formatter: function(params) {
+                        // 🔥🔥🔥 VERSION CHECK - 确认加载最新tooltip代码 v3.9.2-FINAL-V9
+                        console.log('🎯 Tooltip formatter版本: v3.9.2-FINAL-WITH-MINUTE-MATCHING');
+                        
                         const time = params[0].axisValue;
                         let html = `<div style="padding: 8px; min-width: 240px;">`;
                         html += `<div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">`;
