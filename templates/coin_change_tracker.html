@@ -5312,6 +5312,11 @@ pm2 status                                                # 查看所有进程�
                                 console.log('🔍 Tooltip formatter - 检查正数占比数据:');
                                 console.log('  当前时间:', time);
                                 console.log('  window.positiveRatioHistory存在:', window.positiveRatioHistory !== undefined);
+                                if (window.positiveRatioHistory) {
+                                    console.log('  可用的时间点数量:', Object.keys(window.positiveRatioHistory).length);
+                                    console.log('  前3个时间点:', Object.keys(window.positiveRatioHistory).slice(0, 3));
+                                    console.log('  后3个时间点:', Object.keys(window.positiveRatioHistory).slice(-3));
+                                }
                                 
                                 if (window.positiveRatioHistory && window.positiveRatioHistory[time]) {
                                     console.log('  ✅ 找到时间点数据:', window.positiveRatioHistory[time]);

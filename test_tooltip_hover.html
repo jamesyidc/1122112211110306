@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试Tooltip显示</title>
+</head>
+<body>
+    <h1>正在测试tooltip...</h1>
+    <div id="status"></div>
+    <pre id="log"></pre>
+    
+    <script>
+        const log = (msg) => {
+            document.getElementById('log').textContent += msg + '\n';
+            console.log(msg);
+        };
+        
+        // 等待页面加载
+        setTimeout(() => {
+            log('开始检查数据...');
+            
+            // 检查window.positiveRatioHistory
+            if (window.positiveRatioHistory) {
+                log('✅ window.positiveRatioHistory 存在');
+                const keys = Object.keys(window.positiveRatioHistory);
+                log(`   数据点数量: ${keys.length}`);
+                
+                if (keys.length > 0) {
+                    const firstKey = keys[0];
+                    log(`   第一个时间点: ${firstKey}`);
+                    log(`   数据: ${JSON.stringify(window.positiveRatioHistory[firstKey])}`);
+                }
+            } else {
+                log('❌ window.positiveRatioHistory 不存在');
+            }
+            
+            // 检查trendChart
+            if (typeof trendChart !== 'undefined') {
+                log('✅ trendChart 存在');
+                
+                const option = trendChart.getOption();
+                if (option.tooltip && option.tooltip[0]) {
+                    log('✅ tooltip配置存在');
+                    log(`   formatter类型: ${typeof option.tooltip[0].formatter}`);
+                }
+            } else {
+                log('❌ trendChart 不存在');
+            }
+            
+            document.getElementById('status').textContent = '✅ 检查完成';
+        }, 5000);
+    </script>
+</body>
+</html>
