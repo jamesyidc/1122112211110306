@@ -5309,22 +5309,38 @@ pm2 status                                                # 查看所有进程�
                                 html += `</div>`;
                                 
                                 // 🔥 显示当前时间点的正数占比（从00:00到当前时间的累计占比）
+                                // 只匹配到分钟（HH:MM），忽略秒数
+                                const timeMinute = time.substring(0, 5);  // "01:46:12" -> "01:46"
+                                
+                                // 查找匹配的时间点（精确到分钟）
+                                let ratioData = null;
+                                if (window.positiveRatioHistory) {
+                                    // 优先精确匹配
+                                    if (window.positiveRatioHistory[time]) {
+                                        ratioData = window.positiveRatioHistory[time];
+                                    } else {
+                                        // 如果精确匹配失败，查找同一分钟的任意数据点
+                                        const matchingKey = Object.keys(window.positiveRatioHistory).find(key => key.startsWith(timeMinute));
+                                        if (matchingKey) {
+                                            ratioData = window.positiveRatioHistory[matchingKey];
+                                        }
+                                    }
+                                }
+                                
                                 console.log('🔍 Tooltip - 正数占比检查:', {
                                     time: time,
+                                    timeMinute: timeMinute,
+                                    found: !!ratioData,
                                     hasHistory: !!window.positiveRatioHistory,
-                                    dataCount: window.positiveRatioHistory ? Object.keys(window.positiveRatioHistory).length : 0,
-                                    hasTimeData: !!(window.positiveRatioHistory && window.positiveRatioHistory[time]),
-                                    sampleKeys: window.positiveRatioHistory ? Object.keys(window.positiveRatioHistory).slice(0, 5) : []
+                                    dataCount: window.positiveRatioHistory ? Object.keys(window.positiveRatioHistory).length : 0
                                 });
                                 
-                                if (window.positiveRatioHistory && window.positiveRatioHistory[time]) {
+                                if (ratioData) {
                                     console.log('  ✅ 找到正数占比数据:', {
                                         ratio: ratioData.positive_ratio,
                                         count: ratioData.positive_count,
                                         total: ratioData.total_count
                                     });
-                                    
-                                    const ratioData = window.positiveRatioHistory[time];
                                     const positiveRatio = ratioData.positive_ratio;  // 累计正数占比
                                     const positiveCount = ratioData.positive_count;   // 正数时段数
                                     const totalCount = ratioData.total_count;         // 总时段数
