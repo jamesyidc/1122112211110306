@@ -1681,6 +1681,11 @@ def test_chart():
     response.headers['Expires'] = '0'
     return response
 
+@app.route('/test-positive-ratio')
+def test_positive_ratio():
+    """正数占比测试页面"""
+    return send_from_directory('.', 'test_positive_ratio.html')
+
 @app.route('/query')
 def query_page():
     """历史数据查询页面"""
