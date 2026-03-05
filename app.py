@@ -25152,9 +25152,17 @@ def get_positive_ratio_history():
             })
         
         # 读取所有数据，构建时间序列，同时计算累计正数占比
+        # 🔥 只统计指定日期的数据，过滤掉跨日记录
         ratio_data = []
         positive_count = 0
         total_count = 0
+        
+        # 构造日期前缀用于过滤 (YYYY-MM-DD格式)
+        if '-' in date_str if date_str else '':
+            target_date_prefix = date_str  # "2026-03-06"
+        else:
+            # 将YYYYMMDD转换为YYYY-MM-DD
+            target_date_prefix = f"{file_date_str[:4]}-{file_date_str[4:6]}-{file_date_str[6:8]}"
         
         with open(coin_change_file, 'r') as f:
             lines = f.readlines()
@@ -25163,10 +25171,16 @@ def get_positive_ratio_history():
                     record = json.loads(line.strip())
                     total_change = record.get('cumulative_pct', 0) or record.get('total_change', 0)
                     
-                    # 提取时间（HH:MM:SS）
+                    # 提取完整时间戳
                     timestamp = record.get('beijing_time') or record.get('time', '')
+                    
+                    # 🔥 过滤：只保留指定日期的数据
                     if ' ' in timestamp:
-                        time_only = timestamp.split()[1]  # "2026-03-06 15:30:00" -> "15:30:00"
+                        record_date = timestamp.split()[0]  # "2026-03-06 15:30:00" -> "2026-03-06"
+                        # 如果记录日期不是目标日期，跳过
+                        if record_date != target_date_prefix:
+                            continue
+                        time_only = timestamp.split()[1]  # "15:30:00"
                     else:
                         time_only = timestamp
                     
@@ -25182,7 +25196,7 @@ def get_positive_ratio_history():
                         'time': time_only,
                         'total_change': round(total_change, 2),
                         'is_positive': total_change > 0,
-                        'positive_ratio': round(current_ratio, 2),  # 🔥 新增：累计正数占比
+                        'positive_ratio': round(current_ratio, 2),  # 🔥 累计正数占比
                         'positive_count': positive_count,
                         'total_count': total_count
                     })
