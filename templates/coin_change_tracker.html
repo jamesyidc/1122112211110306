@@ -7,10 +7,13 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <!-- 🔥🔥🔥 CRITICAL FIX VERSION - DATE MISMATCH RESOLVED 2026-03-06 04:50 -->
-    <meta name="version" content="3.9.2-FIX-DATE-MISMATCH-V10">
-    <meta http-equiv="last-modified" content="2026-03-06T04:50:00+08:00">
-    <title>27币涨跌幅追踪系统 v3.9.2</title>
+    <!-- 🔥🔥🔥 ULTRA CRITICAL FIX - FORCE CACHE CLEAR 2026-03-06 05:00 -->
+    <meta name="version" content="3.9.2-ULTRA-CACHE-CLEAR-V11">
+    <meta http-equiv="last-modified" content="2026-03-06T05:00:00+08:00">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache, no-store">
+    <meta http-equiv="Expires" content="-1">
+    <title>27币涨跌幅追踪系统 v3.9.2-V11</title>
     
     <!-- 🔥 立即清除所有缓存和Service Worker -->
     <script>
@@ -48,7 +51,7 @@
             });
         }
         
-        console.log('🔥🔥🔥🔥🔥 缓存清理脚本已执行 - v3.9.2-FIX-DATE-MISMATCH-V10 - 加载时间:', new Date().toLocaleString('zh-CN', {timeZone: 'Asia/Shanghai'}));
+        console.log('🔥🔥🔥🔥🔥🔥🔥 缓存清理脚本已执行 - v3.9.2-ULTRA-CACHE-CLEAR-V11 - 加载时间:', new Date().toLocaleString('zh-CN', {timeZone: 'Asia/Shanghai'}));
     })();
     </script>
     <!-- 
@@ -655,7 +658,7 @@
     
     <!-- 🔥🔥🔥 版本信息横幅 - 帮助用户确认是否加载了最新版本 -->
     <div id="versionBanner" style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(90deg, #10b981 0%, #059669 100%); color: white; text-align: center; padding: 8px; z-index: 10000; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-        ✅ 已加载最新版本 v3.9.2-FIX-DATE-MISMATCH-V10 (tooltip正数占比日期匹配已修复) - 2026-03-06 04:50
+        ✅ 已加载最新版本 v3.9.2-ULTRA-CACHE-CLEAR-V11 (正数占比完整修复) - 2026-03-06 05:00
         <button onclick="location.reload(true)" style="background: #dc2626; border: none; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; margin-left: 20px; font-size: 12px; font-weight: bold;">🔥 强制刷新</button>
         <button onclick="this.parentElement.style.display='none'" style="float: right; background: rgba(255,255,255,0.2); border: none; color: white; padding: 2px 10px; border-radius: 4px; cursor: pointer; margin-right: 20px; font-size: 12px;">关闭</button>
     </div>
@@ -5272,8 +5275,8 @@ pm2 status                                                # 查看所有进程�
                         }
                     },
                     formatter: function(params) {
-                        // 🔥🔥🔥 VERSION CHECK - 确认加载最新tooltip代码 v3.9.2-FINAL-V9
-                        console.log('🎯 Tooltip formatter版本: v3.9.2-FINAL-WITH-MINUTE-MATCHING');
+                        // 🔥🔥🔥🔥🔥 VERSION CHECK V11 - TOOLTIP POSITIVE RATIO COMPLETE FIX
+                        console.log('%c🎯🎯🎯 Tooltip formatter版本: v3.9.2-ULTRA-V11-WITH-POSITIVE-RATIO 🎯🎯🎯', 'background: #10B981; color: white; font-size: 16px; font-weight: bold; padding: 8px;');
                         
                         const time = params[0].axisValue;
                         let html = `<div style="padding: 8px; min-width: 240px;">`;
