@@ -1,54 +1,312 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>测试Tooltip显示</title>
+    <title>Tooltip 正数占比测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        #chart {
+            width: 800px;
+            height: 400px;
+            background: white;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+        }
+        .info {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .test-btn:hover {
+            background: #2563EB;
+        }
+        #output {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 3px solid #3B82F6;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
-    <h1>正在测试tooltip...</h1>
-    <div id="status"></div>
-    <pre id="log"></pre>
+    <div class="info">
+        <h2>🧪 Tooltip 正数占比显示测试</h2>
+        <p>这个页面用于测试tooltip是否正确显示正数占比数据。</p>
+        <button class="test-btn" onclick="testTooltip()">🔍 测试Tooltip生成</button>
+        <button class="test-btn" onclick="checkData()">📊 检查数据加载</button>
+        <div id="output"></div>
+    </div>
     
+    <div id="chart"></div>
+
     <script>
-        const log = (msg) => {
-            document.getElementById('log').textContent += msg + '\n';
-            console.log(msg);
+        // 模拟真实数据
+        const times = ['00:01:02', '00:02:27', '00:03:40', '00:04:53', '00:05:18', '03:17:25', '03:18:38'];
+        const changes = [-6.23, -6.44, -8.60, -13.79, 1.25, 2.30, -1.15];
+        
+        // 模拟 window.positiveRatioHistory 数据
+        window.positiveRatioHistory = {
+            '00:01:02': {
+                time: '00:01:02',
+                total_change: -6.23,
+                is_positive: false,
+                positive_ratio: 0.0,
+                positive_count: 0,
+                total_count: 2
+            },
+            '00:02:27': {
+                time: '00:02:27',
+                total_change: -6.44,
+                is_positive: false,
+                positive_ratio: 0.0,
+                positive_count: 0,
+                total_count: 3
+            },
+            '00:03:40': {
+                time: '00:03:40',
+                total_change: -8.60,
+                is_positive: false,
+                positive_ratio: 0.0,
+                positive_count: 0,
+                total_count: 4
+            },
+            '00:04:53': {
+                time: '00:04:53',
+                total_change: -13.79,
+                is_positive: false,
+                positive_ratio: 0.0,
+                positive_count: 0,
+                total_count: 5
+            },
+            '00:05:18': {
+                time: '00:05:18',
+                total_change: 1.25,
+                is_positive: true,
+                positive_ratio: 16.67,  // 1/6 = 16.67%
+                positive_count: 1,
+                total_count: 6
+            },
+            '03:17:25': {
+                time: '03:17:25',
+                total_change: 2.30,
+                is_positive: true,
+                positive_ratio: 25.0,  // 假设这时已经有25%的时段为正
+                positive_count: 15,
+                total_count: 60
+            },
+            '03:18:38': {
+                time: '03:18:38',
+                total_change: -1.15,
+                is_positive: false,
+                positive_ratio: 24.6,
+                positive_count: 15,
+                total_count: 61
+            }
         };
         
-        // 等待页面加载
-        setTimeout(() => {
-            log('开始检查数据...');
-            
-            // 检查window.positiveRatioHistory
-            if (window.positiveRatioHistory) {
-                log('✅ window.positiveRatioHistory 存在');
-                const keys = Object.keys(window.positiveRatioHistory);
-                log(`   数据点数量: ${keys.length}`);
-                
-                if (keys.length > 0) {
-                    const firstKey = keys[0];
-                    log(`   第一个时间点: ${firstKey}`);
-                    log(`   数据: ${JSON.stringify(window.positiveRatioHistory[firstKey])}`);
+        // 模拟 historyData
+        const historyData = times.map((time, index) => ({
+            beijing_time: '2026-03-06 ' + time,
+            time: time,
+            total_change: changes[index],
+            up_ratio: Math.random() * 100  // 随机上涨占比
+        }));
+        
+        // 创建图表
+        const chart = echarts.init(document.getElementById('chart'));
+        
+        // 配置tooltip formatter（和实际代码一致）
+        const option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross'
+                },
+                formatter: function(params) {
+                    const time = params[0].axisValue;
+                    let html = `<div style="padding: 8px; min-width: 240px;">`;
+                    html += `<div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">`;
+                    html += `<i class="far fa-clock" style="margin-right: 4px;"></i>${time}`;
+                    html += `</div>`;
+                    
+                    params.forEach(p => {
+                        const dataIndex = p.dataIndex;
+                        
+                        if (p.seriesName === '27币涨跌幅之和') {
+                            const value = p.value;
+                            let upRatio = '--';
+                            
+                            if (historyData && historyData[dataIndex]) {
+                                if (historyData[dataIndex].up_ratio !== undefined) {
+                                    upRatio = historyData[dataIndex].up_ratio.toFixed(1) + '%';
+                                }
+                            }
+                            
+                            html += `<div style="margin-bottom: 4px;">`;
+                            html += `${p.marker}<span style="font-weight: 600;">${p.seriesName}</span>`;
+                            html += `</div>`;
+                            html += `<div style="font-size: 16px; font-weight: bold; color: ${value > 0 ? '#10B981' : value < 0 ? '#EF4444' : '#6B7280'};">`;
+                            html += `${value > 0 ? '+' : ''}${value}%`;
+                            html += `</div>`;
+                            html += `<div style="margin-top: 4px; font-size: 13px; color: #6B7280;">`;
+                            html += `上涨占比: <span style="font-weight: 600; color: #10B981;">${upRatio}</span>`;
+                            html += `</div>`;
+                            
+                            // 🔥 显示当前时间点的正数占比
+                            console.log('🔍 Tooltip formatter - 检查正数占比数据:');
+                            console.log('  当前时间:', time);
+                            console.log('  window.positiveRatioHistory存在:', window.positiveRatioHistory !== undefined);
+                            
+                            if (window.positiveRatioHistory && window.positiveRatioHistory[time]) {
+                                console.log('  ✅ 找到时间点数据:', window.positiveRatioHistory[time]);
+                                
+                                const ratioData = window.positiveRatioHistory[time];
+                                const positiveRatio = ratioData.positive_ratio;
+                                const positiveCount = ratioData.positive_count;
+                                const totalCount = ratioData.total_count;
+                                
+                                // 根据正数占比设置颜色
+                                let ratioColor = '#EF4444';  // 红色（默认）
+                                let ratioStatus = '大幅下跌';
+                                if (positiveRatio > 60) {
+                                    ratioColor = '#10B981';  // 绿色
+                                    ratioStatus = '强势上涨';
+                                } else if (positiveRatio > 50) {
+                                    ratioColor = '#3B82F6';  // 蓝色
+                                    ratioStatus = '偏多';
+                                } else if (positiveRatio > 40) {
+                                    ratioColor = '#F59E0B';  // 橙色
+                                    ratioStatus = '偏空';
+                                }
+                                
+                                html += `<div style="margin-top: 6px; padding: 6px; background: #F3F4F6; border-radius: 4px;">`;
+                                html += `<div style="font-size: 12px; color: #6B7280; margin-bottom: 2px;">`;
+                                html += `<i class="fas fa-chart-line" style="margin-right: 4px;"></i>正数时段占比`;
+                                html += `</div>`;
+                                html += `<div style="font-size: 14px; font-weight: bold; color: ${ratioColor};">`;
+                                html += `${positiveRatio.toFixed(1)}% ${ratioStatus}`;
+                                html += `</div>`;
+                                html += `<div style="font-size: 11px; color: #9CA3AF; margin-top: 2px;">`;
+                                html += `${positiveCount}/${totalCount} 时段`;
+                                html += `</div>`;
+                                html += `</div>`;
+                            } else {
+                                console.log('  ❌ 未找到时间点数据');
+                                console.log('  可用的时间keys:', Object.keys(window.positiveRatioHistory || {}));
+                            }
+                        }
+                    });
+                    
+                    html += `</div>`;
+                    return html;
                 }
-            } else {
-                log('❌ window.positiveRatioHistory 不存在');
-            }
-            
-            // 检查trendChart
-            if (typeof trendChart !== 'undefined') {
-                log('✅ trendChart 存在');
-                
-                const option = trendChart.getOption();
-                if (option.tooltip && option.tooltip[0]) {
-                    log('✅ tooltip配置存在');
-                    log(`   formatter类型: ${typeof option.tooltip[0].formatter}`);
+            },
+            xAxis: {
+                type: 'category',
+                data: times,
+                axisLabel: {
+                    rotate: 45,
+                    fontSize: 10
                 }
-            } else {
-                log('❌ trendChart 不存在');
-            }
+            },
+            yAxis: {
+                type: 'value',
+                name: '涨跌幅 (%)'
+            },
+            series: [{
+                name: '27币涨跌幅之和',
+                type: 'line',
+                data: changes,
+                smooth: true,
+                lineStyle: {
+                    width: 2,
+                    color: '#3B82F6'
+                },
+                itemStyle: {
+                    color: '#3B82F6'
+                }
+            }]
+        };
+        
+        chart.setOption(option);
+        
+        // 测试函数
+        function testTooltip() {
+            const output = document.getElementById('output');
+            output.innerHTML = '🔍 开始测试tooltip生成...\n\n';
             
-            document.getElementById('status').textContent = '✅ 检查完成';
-        }, 5000);
+            // 模拟tooltip调用
+            const params = [{
+                axisValue: '03:17:25',
+                dataIndex: 5,
+                seriesName: '27币涨跌幅之和',
+                value: 2.30,
+                marker: '<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:#3B82F6;"></span>'
+            }];
+            
+            try {
+                const tooltipHtml = option.tooltip.formatter(params);
+                output.innerHTML += '✅ Tooltip HTML生成成功！\n\n';
+                output.innerHTML += '生成的HTML内容：\n';
+                output.innerHTML += tooltipHtml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                
+                // 检查是否包含正数占比
+                if (tooltipHtml.includes('正数时段占比')) {
+                    output.innerHTML += '\n\n✅ 包含"正数时段占比"！';
+                } else {
+                    output.innerHTML += '\n\n❌ 不包含"正数时段占比"！';
+                }
+                
+                if (tooltipHtml.includes('25.0%')) {
+                    output.innerHTML += '\n✅ 显示了正确的百分比值！';
+                } else {
+                    output.innerHTML += '\n❌ 没有显示正确的百分比值！';
+                }
+            } catch (error) {
+                output.innerHTML += '❌ 错误: ' + error.message;
+            }
+        }
+        
+        function checkData() {
+            const output = document.getElementById('output');
+            output.innerHTML = '📊 数据检查结果：\n\n';
+            output.innerHTML += `window.positiveRatioHistory 存在: ${!!window.positiveRatioHistory}\n`;
+            output.innerHTML += `数据点数量: ${Object.keys(window.positiveRatioHistory || {}).length}\n\n`;
+            output.innerHTML += '样本数据（前3条）:\n';
+            Object.entries(window.positiveRatioHistory || {}).slice(0, 3).forEach(([time, data]) => {
+                output.innerHTML += `\n时间: ${time}\n`;
+                output.innerHTML += `  正数占比: ${data.positive_ratio}%\n`;
+                output.innerHTML += `  正数时段: ${data.positive_count}/${data.total_count}\n`;
+                output.innerHTML += `  当前涨跌: ${data.total_change}%\n`;
+            });
+        }
+        
+        // 自动运行检查
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkData();
+            }, 500);
+        });
     </script>
 </body>
 </html>
