@@ -5308,35 +5308,29 @@ pm2 status                                                # 查看所有进程�
                                 html += `上涨占比: <span style="font-weight: 600; color: #10B981;">${upRatio}</span>`;
                                 html += `</div>`;
                                 
-                                // 🔥 添加正数占比统计（如果有数据）
+                                // 🔥 显示当前时间点的正数/负数状态（而不是全天汇总）
                                 // DEBUG: 添加调试日志
                                 console.log('🔍 Tooltip formatter - 检查正数占比数据:');
-                                console.log('  window.positiveRatioStats存在:', window.positiveRatioStats !== undefined);
-                                if (window.positiveRatioStats) {
-                                    console.log('  positive_ratio:', window.positiveRatioStats.positive_ratio);
-                                    console.log('  positive_ratio类型:', typeof window.positiveRatioStats.positive_ratio);
-                                    console.log('  !== undefined:', window.positiveRatioStats.positive_ratio !== undefined);
-                                }
+                                console.log('  当前时间:', time);
+                                console.log('  window.positiveRatioHistory存在:', window.positiveRatioHistory !== undefined);
                                 
-                                if (window.positiveRatioStats && window.positiveRatioStats.positive_ratio !== undefined) {
-                                    console.log('  ✅ 条件通过！显示正数占比');
-                                    const positiveRatio = window.positiveRatioStats.positive_ratio;
-                                    const positiveCount = window.positiveRatioStats.positive_count;
-                                    const totalCount = window.positiveRatioStats.total_count;
+                                if (window.positiveRatioHistory && window.positiveRatioHistory[time]) {
+                                    console.log('  ✅ 找到时间点数据:', window.positiveRatioHistory[time]);
+                                    
+                                    const ratioData = window.positiveRatioHistory[time];
+                                    const isPositive = ratioData.is_positive;
+                                    const totalChange = ratioData.total_change;
                                     
                                     html += `<div style="margin-top: 6px; padding: 6px; background: #F3F4F6; border-radius: 4px;">`;
                                     html += `<div style="font-size: 12px; color: #6B7280; margin-bottom: 2px;">`;
-                                    html += `<i class="fas fa-chart-line" style="margin-right: 4px;"></i>今日正数时段占比`;
+                                    html += `<i class="fas fa-chart-line" style="margin-right: 4px;"></i>涨跌幅状态`;
                                     html += `</div>`;
-                                    html += `<div style="font-size: 14px; font-weight: bold; color: ${positiveRatio > 50 ? '#10B981' : '#EF4444'};">`;
-                                    html += `${positiveRatio.toFixed(1)}%`;
-                                    html += `</div>`;
-                                    html += `<div style="font-size: 11px; color: #9CA3AF; margin-top: 2px;">`;
-                                    html += `${positiveCount}/${totalCount} 数据点`;
+                                    html += `<div style="font-size: 14px; font-weight: bold; color: ${isPositive ? '#10B981' : '#EF4444'};">`;
+                                    html += `${isPositive ? '✅ 正数' : '❌ 负数'} (${totalChange > 0 ? '+' : ''}${totalChange.toFixed(2)}%)`;
                                     html += `</div>`;
                                     html += `</div>`;
                                 } else {
-                                    console.log('  ❌ 条件不通过，不显示正数占比');
+                                    console.log('  ❌ 未找到时间点数据');
                                 }
                             } else if (p.seriesName === 'RSI之和') {
                                 const rsiValue = p.value;
@@ -7389,8 +7383,8 @@ pm2 status                                                # 查看所有进程�
                             console.warn('日内模式数据加载失败:', e);
                             return {success: false};
                         }),
-                        // 7. 🔥 正数占比统计
-                        fetch(`/api/coin-change-tracker/positive-ratio-stats?${date ? 'date=' + currentDate + '&' : ''}_t=${Date.now()}`, {
+                        // 7. 🔥 正数占比历史数据（用于tooltip显示）
+                        fetch(`/api/coin-change-tracker/positive-ratio-history?${date ? 'date=' + currentDate + '&' : ''}_t=${Date.now()}`, {
                             cache: 'no-store',
                             headers: {
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -7398,8 +7392,8 @@ pm2 status                                                # 查看所有进程�
                                 'Expires': '0'
                             }
                         }).then(r => r.json()).catch(e => {
-                            console.warn('正数占比统计加载失败:', e);
-                            return {success: false};
+                            console.warn('正数占比历史数据加载失败:', e);
+                            return {success: false, data: []};
                         })
                     ]);
                     console.timeEnd('⚡ 并行数据加载');
@@ -7653,20 +7647,30 @@ pm2 status                                                # 查看所有进程�
                     
                     console.log('Velocity count:', velocityValues.length);
                     
-                    // 🔥 处理正数占比统计数据
+                    // 🔥 处理正数占比历史数据
+                    let positiveRatioHistoryMap = {};  // 按时间索引的正数占比数据
                     try {
-                        if (positiveRatioResult.success && positiveRatioResult.stats) {
-                            window.positiveRatioStats = positiveRatioResult.stats;
-                            console.log('✅ 正数占比统计加载成功:', positiveRatioResult.stats);
-                            console.log(`   - 正数占比: ${positiveRatioResult.stats.positive_ratio}%`);
-                            console.log(`   - 正数时段: ${positiveRatioResult.stats.positive_count}/${positiveRatioResult.stats.total_count}`);
+                        if (positiveRatioResult.success && positiveRatioResult.data) {
+                            // 将数组转换为按时间索引的对象，方便tooltip查找
+                            positiveRatioResult.data.forEach(item => {
+                                positiveRatioHistoryMap[item.time] = {
+                                    total_change: item.total_change,
+                                    is_positive: item.is_positive
+                                };
+                            });
+                            window.positiveRatioHistory = positiveRatioHistoryMap;
+                            
+                            console.log('✅ 正数占比历史数据加载成功:', {
+                                count: positiveRatioResult.data.length,
+                                sample: positiveRatioResult.data.slice(0, 3)
+                            });
                         } else {
-                            window.positiveRatioStats = null;
-                            console.log('⚠️ 正数占比统计暂无数据');
+                            window.positiveRatioHistory = {};
+                            console.log('⚠️ 正数占比历史数据暂无数据');
                         }
                     } catch (e) {
-                        console.warn('⚠️ 正数占比统计加载失败:', e);
-                        window.positiveRatioStats = null;
+                        console.warn('⚠️ 正数占比历史数据处理失败:', e);
+                        window.positiveRatioHistory = {};
                     }
                     
                     // 🚀 处理并行加载的波峰数据

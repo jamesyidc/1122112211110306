@@ -25106,6 +25106,96 @@ def get_positive_ratio_stats():
         })
 
 
+@app.route('/api/coin-change-tracker/positive-ratio-history', methods=['GET'])
+def get_positive_ratio_history():
+    """获取每个时间点的正数占比数据（用于tooltip显示）
+    
+    返回数据：
+    - data: 按时间顺序的正数占比数组，每个元素包含：
+      - time: 时间（HH:MM:SS）
+      - positive_ratio: 当时的正数占比 (%)
+      - is_positive: 是否为正（true/false）
+    """
+    try:
+        from datetime import datetime, timezone, timedelta
+        from pathlib import Path
+        
+        # 获取参数
+        date_str = request.args.get('date')  # YYYY-MM-DD 或 YYYYMMDD
+        
+        data_dir = Path('/home/user/webapp/data/coin_change_tracker')
+        
+        if not data_dir.exists():
+            return jsonify({
+                'success': False,
+                'error': '数据目录不存在'
+            })
+        
+        # 如果没有指定日期,使用今天
+        if not date_str:
+            beijing_time = datetime.now(timezone(timedelta(hours=8)))
+            file_date_str = beijing_time.strftime('%Y%m%d')
+        else:
+            # 支持两种格式:YYYY-MM-DD 或 YYYYMMDD
+            if '-' in date_str:
+                file_date_str = date_str.replace('-', '')
+            else:
+                file_date_str = date_str
+        
+        # 读取涨跌数据文件
+        coin_change_file = data_dir / f'coin_change_{file_date_str}.jsonl'
+        
+        if not coin_change_file.exists():
+            return jsonify({
+                'success': False,
+                'error': f'涨跌数据文件不存在: {file_date_str}'
+            })
+        
+        # 读取所有数据，构建时间序列
+        ratio_data = []
+        
+        with open(coin_change_file, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                if line.strip():
+                    record = json.loads(line.strip())
+                    total_change = record.get('cumulative_pct', 0) or record.get('total_change', 0)
+                    
+                    # 提取时间（HH:MM:SS）
+                    timestamp = record.get('beijing_time') or record.get('time', '')
+                    if ' ' in timestamp:
+                        time_only = timestamp.split()[1]  # "2026-03-06 15:30:00" -> "15:30:00"
+                    else:
+                        time_only = timestamp
+                    
+                    ratio_data.append({
+                        'time': time_only,
+                        'total_change': round(total_change, 2),
+                        'is_positive': total_change > 0
+                    })
+        
+        response = jsonify({
+            'success': True,
+            'data': ratio_data,
+            'count': len(ratio_data),
+            'date': file_date_str
+        })
+        
+        # 添加禁用缓存的响应头
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+        
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        })
+
+
 def _record_crash_warning_event(date_str, crash_warning, peaks):
     """记录暴跌预警事件到JSONL文件"""
     try:
