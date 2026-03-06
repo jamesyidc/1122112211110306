@@ -726,7 +726,147 @@
             <div class="doc-panel-content hidden p-6 bg-gray-50" id="docPanelContent">
                 <div class="space-y-6">
                     
-                    <!-- 最新更新 V3.10 (2026-03-06) -->
+                    <!-- 最新更新 V3.11 (2026-03-06) - SAR日历选择器 -->
+                    <div class="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-6 shadow-md border-2 border-cyan-400">
+                        <h3 class="text-lg font-bold text-cyan-800 mb-4 border-b-2 border-cyan-500 pb-2">
+                            <i class="fas fa-calendar-alt text-cyan-600 mr-2"></i>
+                            📅 V3.11 SAR偏向趋势图 - 日历选择器 (2026-03-06)
+                        </h3>
+                        <div class="space-y-4 text-sm text-gray-700">
+                            
+                            <!-- 日历选择器功能 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-cyan-500">
+                                <h4 class="font-bold text-cyan-800 mb-2">
+                                    <i class="fas fa-calendar-check mr-2"></i>
+                                    📆 日历选择器功能
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-cyan-700">新增功能：</p>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs">
+                                        <li><strong>点击日期打开弹窗：</strong>点击页面顶部日期显示区域，弹出日历选择面板</li>
+                                        <li><strong>月视图日历：</strong>显示当月所有日期，可用日期蓝色高亮（#3B82F6）</li>
+                                        <li><strong>今日标记：</strong>今天的日期带青色边框（#06B6D4）便于识别</li>
+                                        <li><strong>月份导航：</strong>上下箭头切换月份，月份下拉框快速跳转</li>
+                                        <li><strong>快捷按钮：</strong>"今天" 按钮一键跳转到今日，"取消" 关闭弹窗</li>
+                                        <li><strong>数据范围：</strong>31个可用日期（2026-02-03 ~ 2026-03-06）</li>
+                                    </ul>
+                                    <div class="bg-cyan-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-cyan-800"><strong>💡 使用场景：</strong>不再需要一天一天点击"前一天"/"后一天"按钮，可以直接点击日历快速跳转到任意历史日期，大大提升查看历史数据的效率。</p>
+                                    </div>
+                                    <div class="bg-gray-100 p-3 rounded mt-2">
+                                        <p class="text-xs"><strong>🎨 UI设计：</strong></p>
+                                        <ul class="list-disc list-inside ml-4 text-xs space-y-0.5">
+                                            <li>弹窗居中显示，半透明黑色遮罩背景</li>
+                                            <li>日历表格 7x6 网格，周日到周六</li>
+                                            <li>可用日期：蓝色背景 + 白色文字</li>
+                                            <li>不可用日期：灰色文字，无法点击</li>
+                                            <li>今日标记：青色粗边框（3px）</li>
+                                            <li>鼠标悬停：可用日期变深蓝色</li>
+                                            <li>点击遮罩或"取消"按钮关闭弹窗</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 后端API -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-indigo-500">
+                                <h4 class="font-bold text-indigo-800 mb-2">
+                                    <i class="fas fa-server mr-2"></i>
+                                    🔌 后端API支持
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-indigo-700">新增端点：</p>
+                                    <div class="bg-gray-100 p-3 rounded">
+                                        <p class="text-xs"><code class="bg-gray-800 text-green-400 px-2 py-1 rounded">GET /api/sar-slope/available-dates</code></p>
+                                        <p class="text-xs mt-2"><strong>返回格式：</strong></p>
+                                        <pre class="text-xs mt-1 bg-gray-800 text-white p-2 rounded">{
+  "success": true,
+  "dates": ["2026-03-06", "2026-03-05", ...],
+  "count": 31
+}</pre>
+                                    </div>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs mt-2">
+                                        <li><strong>数据来源：</strong>扫描 <code>/data/sar_jsonl/{symbol}.jsonl</code> 文件获取时间戳</li>
+                                        <li><strong>优化策略：</strong>仅读取前3个币种（BTC/ETH/BNB）加速响应</li>
+                                        <li><strong>去重排序：</strong>自动去重并按日期倒序返回</li>
+                                        <li><strong>响应时间：</strong>约100-200ms</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- 技术实现 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-green-500">
+                                <h4 class="font-bold text-green-800 mb-2">
+                                    <i class="fas fa-code mr-2"></i>
+                                    🔧 技术实现细节
+                                </h4>
+                                <div class="space-y-2 text-xs">
+                                    <div class="bg-blue-50 p-2 rounded">
+                                        <p class="font-bold text-blue-700 mb-1">前端修改（sar_bias_trend.html）</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>第751-843行：日历弹窗HTML结构（模态框 + 日历表格 + 按钮）</li>
+                                            <li>第903-968行：CSS样式（弹窗、表格、高亮、动画）</li>
+                                            <li>第1783-1800行：<code>loadAvailableDates()</code> 函数加载可用日期</li>
+                                            <li>第1802-1871行：<code>openCalendar()</code> 生成日历视图</li>
+                                            <li>第1873-1925行：<code>renderCalendar()</code> 渲染月份日期</li>
+                                            <li>第1927-1940行：<code>selectDate()</code> 选择日期并加载数据</li>
+                                            <li>第1256行：初始化调用 <code>loadAvailableDates()</code></li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-purple-50 p-2 rounded mt-2">
+                                        <p class="font-bold text-purple-700 mb-1">后端修改（app.py）</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>第14716-14742行：新增 <code>/api/sar-slope/available-dates</code> 路由</li>
+                                            <li>扫描3个主要币种的JSONL文件（BTC/ETH/BNB）</li>
+                                            <li>提取所有 <code>beijing_time</code> 字段并格式化为 YYYY-MM-DD</li>
+                                            <li>使用 <code>set()</code> 去重，<code>sorted(..., reverse=True)</code> 倒序</li>
+                                            <li>返回JSON格式的日期列表及总数</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 部署信息 -->
+                            <div class="bg-gradient-to-r from-green-100 to-teal-100 p-4 rounded-lg">
+                                <h4 class="font-bold text-green-800 mb-2">
+                                    <i class="fas fa-rocket mr-2"></i>
+                                    🚀 部署信息
+                                </h4>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <p><strong>版本：</strong><code>v2.3-calendar</code></p>
+                                        <p><strong>提交1：</strong><code>5be6433</code>（日历功能）</p>
+                                        <p><strong>提交2：</strong><code>b17b29a</code>（推送GitHub）</p>
+                                    </div>
+                                    <div>
+                                        <p><strong>更新时间：</strong>2026-03-06 05:55</p>
+                                        <p><strong>页面访问：</strong><a href="/sar-bias-trend" class="text-blue-600 hover:underline">SAR偏向趋势图</a></p>
+                                        <p><strong>数据范围：</strong>31天（2026-02-03 ~ 2026-03-06）</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 使用指南 -->
+                            <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                                <h4 class="font-bold text-yellow-800 mb-2">
+                                    <i class="fas fa-book-open mr-2"></i>
+                                    📖 使用指南
+                                </h4>
+                                <ol class="list-decimal list-inside space-y-1 ml-4 text-xs">
+                                    <li>打开 <strong>SAR偏向趋势图</strong> 页面</li>
+                                    <li>点击页面顶部的 <strong>日期显示区域</strong>（例如 "2026-03-06"）</li>
+                                    <li>弹出日历选择面板，<strong>蓝色日期</strong>表示有数据可查看</li>
+                                    <li>点击任意蓝色日期，页面会自动加载该日期的SAR数据</li>
+                                    <li>使用 <strong>上/下箭头</strong> 或 <strong>月份下拉框</strong> 切换月份</li>
+                                    <li>点击 <strong>"今天"</strong> 按钮快速回到今日数据</li>
+                                    <li>点击 <strong>"取消"</strong> 或遮罩区域关闭弹窗</li>
+                                </ol>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <!-- V3.10 (2026-03-06) - 5分钟涨速监控 + 27币种完整性 -->
                     <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 shadow-md border-2 border-purple-400">
                         <h3 class="text-lg font-bold text-purple-800 mb-4 border-b-2 border-purple-500 pb-2">
                             <i class="fas fa-bell text-purple-600 mr-2"></i>
