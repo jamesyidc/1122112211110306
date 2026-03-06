@@ -726,6 +726,154 @@
             <div class="doc-panel-content hidden p-6 bg-gray-50" id="docPanelContent">
                 <div class="space-y-6">
                     
+                    <!-- 最新更新 V3.10 (2026-03-06) -->
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 shadow-md border-2 border-purple-400">
+                        <h3 class="text-lg font-bold text-purple-800 mb-4 border-b-2 border-purple-500 pb-2">
+                            <i class="fas fa-bell text-purple-600 mr-2"></i>
+                            🚨 V3.10 5分钟涨速暴跌监控 + 27币种完整性保障 (2026-03-06)
+                        </h3>
+                        <div class="space-y-4 text-sm text-gray-700">
+                            
+                            <!-- 5分钟涨速监控 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-red-500">
+                                <h4 class="font-bold text-red-800 mb-2">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>
+                                    📉 5分钟涨速暴跌实时监控
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-red-700">监控功能：</p>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs">
+                                        <li><strong>触发阈值：</strong>最低5分钟涨速 < -30%（多头爆仓信号）</li>
+                                        <li><strong>检查频率：</strong>每30秒实时检测一次</li>
+                                        <li><strong>报警方式：</strong>Telegram发送3条消息（强调低吸机会）</li>
+                                        <li><strong>冷却机制：</strong>30分钟内不重复报警（防刷屏）</li>
+                                        <li><strong>数据来源：</strong><code>/api/coin-change-tracker/velocity-history</code></li>
+                                        <li><strong>历史记录：</strong>保存至 <code>data/five_min_speed_monitor/alert_history.json</code></li>
+                                    </ul>
+                                    <div class="bg-red-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-red-800"><strong>💡 使用场景：</strong>当5分钟涨速急速下跌至-30%以下时，说明大量多头爆仓，价格短期暴跌，此时是<span class="font-bold text-red-600">低吸抄底的黄金时机</span>。系统会立即发送3条Telegram提醒，确保不错过机会。</p>
+                                    </div>
+                                    <div class="bg-gray-100 p-3 rounded mt-2">
+                                        <p class="text-xs"><strong>📊 报警消息格式：</strong></p>
+                                        <pre class="text-xs mt-1 bg-gray-800 text-green-400 p-2 rounded">🚨 5分钟涨速暴跌预警！多头爆仓，低吸机会！
+━━━━━━━━━━━━━━━━━━
+📉 最低涨速: -32.45%
+📊 当前涨速: -15.23%
+📈 平均涨速: -18.67%
+🔝 最高涨速: -8.12%
+⚠️ 阈值: -30.0%
+━━━━━━━━━━━━━━━━━━
+⏰ 检查时间: 2026-03-06 18:05:50
+📅 数据时间: 2026-03-06 18:05:26
+📊 数据点数: 50</pre>
+                                    </div>
+                                    <p class="text-xs text-gray-600 mt-2">
+                                        <i class="fas fa-cog mr-1"></i>
+                                        <strong>服务管理：</strong> PM2服务名 <code>five-min-speed-crash-monitor</code>，自动重启，日志位于 <code>~/.pm2/logs/</code>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 27币种完整性保障 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-blue-500">
+                                <h4 class="font-bold text-blue-800 mb-2">
+                                    <i class="fas fa-shield-alt mr-2"></i>
+                                    🔒 27币种数据完整性强制校验
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-blue-700">数据质量保障：</p>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs">
+                                        <li><strong>强制要求：</strong>必须采集全部27个币种，缺一不可</li>
+                                        <li><strong>两层校验：</strong>
+                                            <ol class="list-decimal list-inside ml-4 mt-1">
+                                                <li>采集阶段：<code>current_prices</code> 必须包含27个币种</li>
+                                                <li>计算阶段：<code>changes</code> 字典必须包含27个币种</li>
+                                            </ol>
+                                        </li>
+                                        <li><strong>不完整处理：</strong>数据不足27个时，跳过保存，记录警告日志</li>
+                                        <li><strong>日志标识：</strong>✅ = 27/27完整数据；❌ = 数据不完整（已跳过）</li>
+                                        <li><strong>监控币种：</strong>
+                                            <div class="bg-gray-100 p-2 rounded mt-1">
+                                                <code class="text-xs">BTC, ETH, XRP, BNB, SOL, LTC, DOGE, SUI, TRX, TON, ETC, BCH, HBAR, XLM, FIL, LINK, CRO, DOT, AAVE, UNI, NEAR, APT, CFX, CRV, STX, LDO, TAO</code>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div class="bg-yellow-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-yellow-800"><strong>⚠️ 为什么必须27个？</strong></p>
+                                        <ul class="list-disc list-inside ml-4 mt-1 text-xs">
+                                            <li>币种缺失会导致涨跌幅计算失真</li>
+                                            <li>上涨币数/下跌币数统计错误</li>
+                                            <li>累计涨跌幅百分比不准确</li>
+                                            <li>影响预判信号的可靠性</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-green-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-green-800"><strong>✅ 解决方案：</strong></p>
+                                        <ul class="list-disc list-inside ml-4 mt-1 text-xs">
+                                            <li>修正币种列表（移除MATIC，使用正确的27个币种）</li>
+                                            <li>添加双重完整性检查（采集+计算）</li>
+                                            <li>不完整数据不写入JSONL文件</li>
+                                            <li>详细日志记录缺失币种信息</li>
+                                            <li>自动重试机制（每分钟重新采集）</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 技术实现 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-indigo-500">
+                                <h4 class="font-bold text-indigo-800 mb-2">
+                                    <i class="fas fa-code mr-2"></i>
+                                    🔧 技术实现细节
+                                </h4>
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    <div class="bg-purple-50 p-2 rounded">
+                                        <p class="font-bold text-purple-700 mb-1">5分钟涨速监控</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>脚本：<code>five_min_speed_crash_monitor.py</code></li>
+                                            <li>PM2配置：<code>ecosystem.config.five_min_speed.js</code></li>
+                                            <li>服务ID：40（auto-restart）</li>
+                                            <li>提交：<code>2061e19</code></li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-blue-50 p-2 rounded">
+                                        <p class="font-bold text-blue-700 mb-1">27币种完整性</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>修改文件：<code>coin_change_tracker_collector.py</code></li>
+                                            <li>校验位置：L422-453（采集）+ L456-478（计算）</li>
+                                            <li>提交1：<code>186747b</code>（币种列表）</li>
+                                            <li>提交2：<code>cb9b526</code>（完整性检查）</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-100 p-3 rounded mt-3">
+                                    <p class="text-xs"><strong>📝 状态监控脚本：</strong></p>
+                                    <pre class="text-xs mt-1 bg-gray-800 text-white p-2 rounded">cd /home/user/webapp && ./scripts/check_coin_status.sh</pre>
+                                    <p class="text-xs mt-1 text-gray-600">显示：当前币种数、缺失币种、采集状态、最新数据时间</p>
+                                </div>
+                            </div>
+
+                            <!-- 部署信息 -->
+                            <div class="bg-gradient-to-r from-green-100 to-teal-100 p-4 rounded-lg">
+                                <h4 class="font-bold text-green-800 mb-2">
+                                    <i class="fas fa-rocket mr-2"></i>
+                                    🚀 部署信息
+                                </h4>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <p><strong>分支：</strong><code>deployment/complete-okx-trading-system</code></p>
+                                        <p><strong>最新提交：</strong><code>cb9b526</code></p>
+                                    </div>
+                                    <div>
+                                        <p><strong>更新时间：</strong>2026-03-06 18:05</p>
+                                        <p><strong>服务状态：</strong>PM2 39/39在线 + 监控服务</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
                     <!-- 最新修复 V3.6 (2026-02-28) -->
                     <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-6 shadow-md border-2 border-red-400">
                         <h3 class="text-lg font-bold text-red-800 mb-4 border-b-2 border-red-500 pb-2">
