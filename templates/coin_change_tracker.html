@@ -9364,6 +9364,86 @@ pm2 status                                                # 查看所有进程�
                                     shadowBlur: 10,
                                     shadowColor: 'rgba(249, 115, 22, 0.5)'
                                 }
+                            },
+                            // 🔥 新增：标记最高和最低涨速点
+                            markPoint: {
+                                data: (function() {
+                                    const marks = [];
+                                    
+                                    // 只有当有涨速数据时才添加标记
+                                    if (velocityValues && velocityValues.length > 0 && window.velocityStatsForChart) {
+                                        const stats = window.velocityStatsForChart;
+                                        
+                                        // 找到最高涨速的索引
+                                        if (stats.max !== null) {
+                                            const maxIndex = velocityValues.findIndex(v => v === stats.max);
+                                            if (maxIndex >= 0) {
+                                                marks.push({
+                                                    name: '最高涨速',
+                                                    coord: [maxIndex, stats.max],
+                                                    value: stats.max.toFixed(2) + '%',
+                                                    symbol: 'pin',
+                                                    symbolSize: 50,
+                                                    itemStyle: {
+                                                        color: '#10B981'  // 绿色
+                                                    },
+                                                    label: {
+                                                        show: true,
+                                                        position: 'top',
+                                                        formatter: '最高\n{c}%',
+                                                        fontSize: 11,
+                                                        fontWeight: 'bold',
+                                                        color: '#10B981',
+                                                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                                        padding: [4, 8],
+                                                        borderRadius: 4,
+                                                        borderColor: '#10B981',
+                                                        borderWidth: 1
+                                                    }
+                                                });
+                                            }
+                                        }
+                                        
+                                        // 找到最低涨速的索引
+                                        if (stats.min !== null) {
+                                            const minIndex = velocityValues.findIndex(v => v === stats.min);
+                                            if (minIndex >= 0) {
+                                                marks.push({
+                                                    name: '最低涨速',
+                                                    coord: [minIndex, stats.min],
+                                                    value: stats.min.toFixed(2) + '%',
+                                                    symbol: 'pin',
+                                                    symbolSize: 50,
+                                                    itemStyle: {
+                                                        color: '#EF4444'  // 红色
+                                                    },
+                                                    label: {
+                                                        show: true,
+                                                        position: 'bottom',
+                                                        formatter: '最低\n{c}%',
+                                                        fontSize: 11,
+                                                        fontWeight: 'bold',
+                                                        color: '#EF4444',
+                                                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                        padding: [4, 8],
+                                                        borderRadius: 4,
+                                                        borderColor: '#EF4444',
+                                                        borderWidth: 1
+                                                    }
+                                                });
+                                            }
+                                        }
+                                        
+                                        console.log('📌 涨速标记点:', {
+                                            markCount: marks.length,
+                                            max: stats.max,
+                                            min: stats.min,
+                                            marks: marks
+                                        });
+                                    }
+                                    
+                                    return marks;
+                                })()
                             }
                         },
                         // 🔥🔥🔥 新增：正数占比透明虚线（仅用于tooltip显示，不可见）
