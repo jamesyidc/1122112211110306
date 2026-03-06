@@ -21,14 +21,14 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 
-# 27个追踪的币种
+# 27个追踪的币种（2026-03-06更新）
 SYMBOLS = [
-    'BTC', 'ETH', 'BNB', 'XRP', 'DOGE', 
-    'SOL', 'DOT', 'MATIC', 'LTC', 'LINK',
-    'HBAR', 'TAO', 'CFX', 'TRX', 'TON',
-    'NEAR', 'LDO', 'CRO', 'ETC', 'XLM',
-    'BCH', 'UNI', 'SUI', 'FIL', 'STX',
-    'CRV', 'AAVE', 'APT'
+    'BTC', 'ETH', 'XRP', 'BNB', 'SOL',
+    'LTC', 'DOGE', 'SUI', 'TRX', 'TON',
+    'ETC', 'BCH', 'HBAR', 'XLM', 'FIL',
+    'LINK', 'CRO', 'DOT', 'AAVE', 'UNI',
+    'NEAR', 'APT', 'CFX', 'CRV', 'STX',
+    'LDO', 'TAO'
 ]
 
 
