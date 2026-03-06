@@ -15029,6 +15029,77 @@ def sar_slope_bias_trend_by_date():
         })
 
 
+@app.route('/api/sar-slope/available-dates')
+def sar_slope_available_dates():
+    """获取所有有SAR数据的日期列表"""
+    try:
+        from datetime import datetime
+        import json
+        import pytz
+        from pathlib import Path
+        from collections import defaultdict
+        
+        # 北京时区
+        beijing_tz = pytz.timezone('Asia/Shanghai')
+        
+        # SAR数据目录
+        sar_data_dir = Path('/home/user/webapp/data/sar_jsonl')
+        
+        # 定义币种列表
+        SYMBOLS = ['BTC', 'ETH', 'BNB', 'XRP', 'ADA', 'DOGE', 'SOL', 'DOT', 'LTC', 
+                   'LINK', 'HBAR', 'TAO', 'CFX', 'TRX', 'TON', 'NEAR', 'LDO', 'CRO', 'ETC', 
+                   'XLM', 'BCH', 'UNI', 'SUI', 'FIL', 'STX', 'CRV', 'AAVE', 'APT', 'OKB']
+        
+        # 存储所有日期
+        all_dates = set()
+        
+        # 读取每个币种的数据，提取日期
+        for symbol in SYMBOLS[:3]:  # 只读取前3个币种的数据即可（BTC、ETH、BNB）
+            jsonl_file = sar_data_dir / f'{symbol}.jsonl'
+            if not jsonl_file.exists():
+                continue
+            
+            try:
+                with open(jsonl_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        
+                        try:
+                            record = json.loads(line)
+                            beijing_time_str = record.get('beijing_time', '')
+                            if not beijing_time_str:
+                                continue
+                            
+                            # 提取日期部分 (YYYY-MM-DD)
+                            date_part = beijing_time_str.split(' ')[0]
+                            all_dates.add(date_part)
+                        except:
+                            continue
+            except Exception as e:
+                print(f"[Available Dates] 读取 {symbol} 失败: {e}")
+                continue
+        
+        # 转换为排序列表
+        sorted_dates = sorted(list(all_dates), reverse=True)  # 最新的日期在前
+        
+        return jsonify({
+            'success': True,
+            'dates': sorted_dates,
+            'count': len(sorted_dates)
+        })
+    
+    except Exception as e:
+        print(f"[Available Dates] 错误: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'dates': []
+        })
+
 @app.route('/api/sar-slope/bias-stats/history')
 def api_sar_bias_stats_history():
     """获取SAR多空占比统计历史数据 - 从JSONL读取"""
