@@ -15404,27 +15404,42 @@ ${data.sMsg || result.message || ''}`);
             statusContent.innerHTML = '<div style="text-align: center; padding: 10px; color: #60a5fa;">⏳ 正在加载...</div>';
             
             try {
-                // 🔧 获取当前正数占比 - 从最新的涨跌数据中计算
-                const latestResponse = await fetch('/api/coin-change-tracker/latest-change');
-                const latestData = await latestResponse.json();
+                // 🔧 获取当前正数占比 - 从统计API获取（更准确）
+                const statsResponse = await fetch('/api/coin-change-tracker/positive-ratio-stats');
+                const statsData = await statsResponse.json();
                 
                 let currentRatio = 0;
-                if (latestData.success && latestData.data && latestData.data.changes) {
-                    const changes = latestData.data.changes;
-                    let positiveCount = 0;
-                    let totalCount = 0;
-                    
-                    for (const [coin, info] of Object.entries(changes)) {
-                        if (info.change_pct > 0) positiveCount++;
-                        totalCount++;
-                    }
-                    
-                    currentRatio = totalCount > 0 ? (positiveCount / totalCount) * 100 : 0;
-                    console.log('📊 [正数占比] 计算结果:', {
-                        positiveCount,
-                        totalCount,
-                        currentRatio: currentRatio.toFixed(2) + '%'
+                if (statsData.success && statsData.stats) {
+                    // 使用统计API返回的正数占比
+                    currentRatio = statsData.stats.positive_ratio || 0;
+                    console.log('📊 [正数占比] 从统计API获取:', {
+                        positive_count: statsData.stats.positive_count,
+                        total_count: statsData.stats.total_count,
+                        positive_ratio: currentRatio.toFixed(2) + '%'
                     });
+                } else {
+                    // 如果统计API失败，回退到计算方式
+                    console.warn('⚠️ [正数占比] 统计API失败，使用计算方式');
+                    const latestResponse = await fetch('/api/coin-change-tracker/latest-change');
+                    const latestData = await latestResponse.json();
+                    
+                    if (latestData.success && latestData.data && latestData.data.changes) {
+                        const changes = latestData.data.changes;
+                        let positiveCount = 0;
+                        let totalCount = 0;
+                        
+                        for (const [coin, info] of Object.entries(changes)) {
+                            if (info.change_pct > 0) positiveCount++;
+                            totalCount++;
+                        }
+                        
+                        currentRatio = totalCount > 0 ? (positiveCount / totalCount) * 100 : 0;
+                        console.log('📊 [正数占比] 计算结果:', {
+                            positiveCount,
+                            totalCount,
+                            currentRatio: currentRatio.toFixed(2) + '%'
+                        });
+                    }
                 }
                 
                 // 获取配置
