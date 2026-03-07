@@ -31218,3 +31218,255 @@ if __name__ == '__main__':
 def test_midnight_hedge():
     """测试对冲底仓开关功能"""
     return render_template('test_midnight_hedge.html')
+
+
+# ============================================
+# 正数占比止盈止损系统 API
+# 2026-03-07
+# 功能：基于正数占比40%阈值自动平仓
+# ============================================
+
+@app.route('/api/okx-trading/positive-ratio-stoploss/config/<account_id>', methods=['GET', 'POST'])
+def positive_ratio_stoploss_config(account_id):
+    """
+    正数占比止盈止损配置API
+    
+    GET: 获取配置
+    POST: 保存配置
+    
+    配置参数:
+    - enabled: 是否启用 (boolean)
+    - threshold: 正数占比阈值 (默认40%)
+    - last_status: 上次状态 ("above" | "below" | null)
+    - last_ratio: 上次正数占比值
+    - last_check_time: 上次检查时间
+    - allow_once: 只允许单次执行 (boolean, 默认True)
+    """
+    import json
+    from pathlib import Path
+    from datetime import datetime, timezone, timedelta
+    
+    config_dir = Path('/home/user/webapp/data/positive_ratio_stoploss')
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_file = config_dir / f'{account_id}_config.json'
+    
+    if request.method == 'GET':
+        # 读取配置
+        if config_file.exists():
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        else:
+            # 默认配置
+            config = {
+                'enabled': False,
+                'threshold': 40.0,
+                'last_status': None,
+                'last_ratio': None,
+                'last_check_time': None,
+                'allow_once': True
+            }
+        
+        return jsonify({
+            'success': True,
+            'config': config
+        })
+    
+    elif request.method == 'POST':
+        # 保存配置
+        data = request.get_json()
+        
+        # 读取现有配置（保留历史状态）
+        if config_file.exists():
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        else:
+            config = {
+                'last_status': None,
+                'last_ratio': None,
+                'last_check_time': None
+            }
+        
+        # 更新配置
+        config['enabled'] = data.get('enabled', False)
+        config['threshold'] = data.get('threshold', 40.0)
+        config['allow_once'] = data.get('allow_once', True)
+        
+        # 保存配置
+        with open(config_file, 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=2)
+        
+        # 记录到JSONL历史
+        history_file = config_dir / f'{account_id}_history.jsonl'
+        beijing_time = datetime.now(timezone(timedelta(hours=8)))
+        history_record = {
+            'timestamp': beijing_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'action': 'config_update',
+            'enabled': config['enabled'],
+            'threshold': config['threshold'],
+            'allow_once': config['allow_once']
+        }
+        with open(history_file, 'a', encoding='utf-8') as f:
+            json.dump(history_record, f, ensure_ascii=False)
+            f.write('\n')
+        
+        return jsonify({
+            'success': True,
+            'config': config
+        })
+
+
+@app.route('/api/okx-trading/positive-ratio-stoploss/check/<account_id>', methods=['POST'])
+def positive_ratio_stoploss_check(account_id):
+    """
+    检查正数占比并执行止盈止损
+    
+    返回:
+    - action: "close_long" | "close_short" | "none"
+    - trigger: 是否触发
+    - current_ratio: 当前正数占比
+    - threshold: 阈值
+    - last_status: 上次状态
+    - current_status: 当前状态
+    """
+    import json
+    from pathlib import Path
+    from datetime import datetime, timezone, timedelta
+    
+    config_dir = Path('/home/user/webapp/data/positive_ratio_stoploss')
+    config_file = config_dir / f'{account_id}_config.json'
+    
+    # 读取配置
+    if not config_file.exists():
+        return jsonify({
+            'success': False,
+            'error': '配置不存在，请先配置'
+        })
+    
+    with open(config_file, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+    
+    # 检查是否启用
+    if not config.get('enabled', False):
+        return jsonify({
+            'success': True,
+            'trigger': False,
+            'reason': '策略未启用'
+        })
+    
+    # 获取当前正数占比
+    try:
+        # 调用现有的正数占比API
+        import requests
+        response = requests.get('http://localhost:9002/api/coin-change-tracker/positive-ratio-stats')
+        ratio_data = response.json()
+        
+        if not ratio_data.get('success'):
+            return jsonify({
+                'success': False,
+                'error': '无法获取正数占比数据'
+            })
+        
+        current_ratio = ratio_data['stats']['positive_ratio']
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'获取正数占比失败: {str(e)}'
+        })
+    
+    threshold = config.get('threshold', 40.0)
+    last_status = config.get('last_status')
+    allow_once = config.get('allow_once', True)
+    
+    # 判断当前状态
+    current_status = 'above' if current_ratio >= threshold else 'below'
+    
+    # 判断是否触发
+    action = 'none'
+    trigger = False
+    reason = ''
+    
+    # 从 below 转为 above -> 平空单
+    if last_status == 'below' and current_status == 'above':
+        action = 'close_short'
+        trigger = True
+        reason = f'正数占比从 <{threshold}% 上升至 ≥{threshold}%，平掉所有空单'
+    
+    # 从 above 转为 below -> 平多单
+    elif last_status == 'above' and current_status == 'below':
+        action = 'close_long'
+        trigger = True
+        reason = f'正数占比从 ≥{threshold}% 下降至 <{threshold}%，平掉所有多单'
+    
+    # 更新配置状态
+    beijing_time = datetime.now(timezone(timedelta(hours=8)))
+    config['last_status'] = current_status
+    config['last_ratio'] = current_ratio
+    config['last_check_time'] = beijing_time.strftime('%Y-%m-%d %H:%M:%S')
+    
+    # 如果触发且设置为单次执行，禁用策略
+    if trigger and allow_once:
+        config['enabled'] = False
+        reason += ' (单次执行，已自动关闭策略)'
+    
+    # 保存更新后的配置
+    with open(config_file, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+    
+    # 记录到JSONL历史
+    history_file = config_dir / f'{account_id}_history.jsonl'
+    history_record = {
+        'timestamp': beijing_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'action': 'check',
+        'trigger': trigger,
+        'close_action': action,
+        'current_ratio': current_ratio,
+        'threshold': threshold,
+        'last_status': last_status,
+        'current_status': current_status,
+        'reason': reason
+    }
+    with open(history_file, 'a', encoding='utf-8') as f:
+        json.dump(history_record, f, ensure_ascii=False)
+        f.write('\n')
+    
+    return jsonify({
+        'success': True,
+        'trigger': trigger,
+        'action': action,
+        'current_ratio': current_ratio,
+        'threshold': threshold,
+        'last_status': last_status,
+        'current_status': current_status,
+        'reason': reason,
+        'config': config
+    })
+
+
+@app.route('/api/okx-trading/positive-ratio-stoploss/history/<account_id>', methods=['GET'])
+def positive_ratio_stoploss_history(account_id):
+    """获取正数占比止盈止损历史记录"""
+    import json
+    from pathlib import Path
+    
+    config_dir = Path('/home/user/webapp/data/positive_ratio_stoploss')
+    history_file = config_dir / f'{account_id}_history.jsonl'
+    
+    if not history_file.exists():
+        return jsonify({
+            'success': True,
+            'history': []
+        })
+    
+    # 读取历史记录（最近100条）
+    history = []
+    with open(history_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        for line in lines[-100:]:  # 只取最近100条
+            if line.strip():
+                history.append(json.loads(line.strip()))
+    
+    return jsonify({
+        'success': True,
+        'history': history
+    })
+
