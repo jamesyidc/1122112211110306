@@ -10503,7 +10503,7 @@ def telegram_send_message():
             'traceback': traceback.format_exc()
         })
 
-def send_trading_telegram_notification(action_type, details):
+def send_trading_telegram_notification(action_type, details, account_id=None):
     """
     发送交易相关的Telegram通知
     
@@ -10513,6 +10513,7 @@ def send_trading_telegram_notification(action_type, details):
             - instId: 交易对
             - side: buy/sell
             - posSide: long/short
+        account_id: 账户ID (可选)
             - size: 数量
             - price: 价格
             - usdt: USDT金额
@@ -10553,6 +10554,15 @@ def send_trading_telegram_notification(action_type, details):
         leverage = details.get('leverage', 1)
         
         # 根据操作类型生成不同的消息
+        # 账户名称映射
+        account_names = {
+            'account_main': '主账户',
+            'account_fangfang12': 'Fangfang12',
+            'account_anchor': '锚点账号',
+            'account_poit': 'POIT'
+        }
+        account_name = account_names.get(account_id, account_id) if account_id else '未知账户'
+        
         if action_type == 'open_position':
             emoji = "🚀" if pos_side == 'long' else "🔻"
             action_text = "开多仓" if pos_side == 'long' else "开空仓"
@@ -10560,6 +10570,7 @@ def send_trading_telegram_notification(action_type, details):
             message = f"""
 {emoji} <b>OKX开仓通知</b>
 
+📋 <b>交易账户:</b> {account_name}
 📊 <b>交易对:</b> {inst_id}
 📈 <b>方向:</b> {action_text}
 💰 <b>金额:</b> {usdt:.2f} USDT
@@ -16243,6 +16254,7 @@ def place_okx_order():
                 passphrase = passphrase or config['passphrase']
 
         passphrase = data.get('passphrase', '')
+        account_id = data.get('accountId', None)  # 账户ID(用于TG通知显示)
         
         # 订单参数
         inst_id = data.get('instId', '')  # 交易对,如 BTC-USDT-SWAP
@@ -16687,7 +16699,7 @@ def place_okx_order():
                         'leverage': leverage_value,
                         'tpPrice': tpsl_result.get('tpPrice') if tpsl_result else None,
                         'slPrice': tpsl_result.get('slPrice') if tpsl_result else None
-                    })
+                    }, account_id)
                 except Exception as e:
                     print(f"[TG通知] 开仓通知发送失败: {str(e)}")
                 
