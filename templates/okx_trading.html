@@ -15405,14 +15405,20 @@ ${data.sMsg || result.message || ''}`);
             
             try {
                 // 🔧 获取当前正数占比 - 从统计API获取（更准确）
+                // 💡 优先使用今天的数据，如果今天数据不足，使用最新可用数据
+                let currentRatio = 0;
+                let dataDate = '';
+                
+                // 尝试获取今天的统计数据
                 const statsResponse = await fetch('/api/coin-change-tracker/positive-ratio-stats');
                 const statsData = await statsResponse.json();
                 
-                let currentRatio = 0;
-                if (statsData.success && statsData.stats) {
+                if (statsData.success && statsData.stats && statsData.stats.positive_ratio) {
                     // 使用统计API返回的正数占比
                     currentRatio = statsData.stats.positive_ratio || 0;
+                    dataDate = statsData.stats.date || '';
                     console.log('📊 [正数占比] 从统计API获取:', {
+                        date: dataDate,
                         positive_count: statsData.stats.positive_count,
                         total_count: statsData.stats.total_count,
                         positive_ratio: currentRatio.toFixed(2) + '%'
@@ -15492,6 +15498,7 @@ ${data.sMsg || result.message || ''}`);
                                 <span style="color: #64748b;">当前正数占比：</span>
                                 <strong style="color: #3b82f6; font-size: 15px;">${currentRatio.toFixed(2)}%</strong>
                             </div>
+                            ${dataDate ? `<div style="font-size: 11px; color: #94a3b8; text-align: right; margin-top: -4px;">数据日期: ${dataDate.slice(0,4)}-${dataDate.slice(4,6)}-${dataDate.slice(6,8)}</div>` : ''}
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #64748b;">设定阈值：</span>
                                 <strong style="color: #f59e0b;">${threshold.toFixed(1)}%</strong>
