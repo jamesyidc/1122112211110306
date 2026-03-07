@@ -1974,105 +1974,7 @@
             </div>
         </div>
 
-        <!-- 🔥 止盈止损后台自动执行说明 (2026-02-28) -->
-        <div style="margin: 10px 0; padding: 15px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 8px; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);">
-            <h4 style="margin: 0 0 10px 0; color: #065f46; font-size: 14px; font-weight: 800;">
-                ✅ 止盈止损后台自动执行 - 无需浏览器打开 (v3.0 - 2026-02-28)
-            </h4>
-            <div style="font-size: 11px; line-height: 1.8; color: #064e3b;">
-                <p style="margin: 0 0 8px 0;"><strong>【问题】</strong>止盈止损需要浏览器保持打开，关闭后无法执行</p>
-                
-                <p style="margin: 0 0 8px 0;"><strong>【修复】</strong>后台自动监控服务 - 7×24小时运行</p>
-                <div style="background: white; padding: 10px; border-radius: 6px; margin: 8px 0;">
-                    <p style="margin: 0 0 6px 0; font-weight: 700; color: #10b981;">🟢 后台监控进程：okx-tpsl-monitor</p>
-                    <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px;">
-                        <li>✅ PM2守护进程管理，崩溃自动重启</li>
-                        <li>✅ 每60秒自动检查所有账户的持仓盈亏</li>
-                        <li>✅ 触发止盈/止损条件时立即执行平仓</li>
-                        <li>✅ 完全不依赖浏览器，关闭浏览器也能执行</li>
-                        <li>✅ 支持普通止盈止损 + 市场情绪紧急止盈</li>
-                    </ul>
-                </div>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">📊 监控账户（5个）：</p>
-                <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px;">
-                    <li>account_main（主账户）</li>
-                    <li>account_fangfang12</li>
-                    <li>account_poit_main（POIT子账户）</li>
-                    <li>account_anchor（锚点账户）</li>
-                    <li>account_dadanini（新增）</li>
-                </ul>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">🎯 工作流程：</p>
-                <div style="background: #f0fdf4; padding: 8px; border-radius: 4px; margin: 6px 0; border-left: 3px solid #10b981;">
-                    <ol style="margin: 0; padding-left: 20px; font-size: 10px;">
-                        <li>每60秒扫描所有账户</li>
-                        <li>读取止盈止损配置（data/okx_tpsl_settings/）</li>
-                        <li>获取当前持仓并计算盈亏百分比</li>
-                        <li>检查是否触发：
-                            <ul style="margin: 4px 0 0 15px;">
-                                <li>市场情绪止盈（优先）：检测到极端信号立即平仓</li>
-                                <li>普通止盈：盈亏% ≥ 止盈阈值</li>
-                                <li>普通止损：盈亏% ≤ 止损阈值</li>
-                            </ul>
-                        </li>
-                        <li>执行平仓（调用OKX API设置条件单）</li>
-                        <li>记录执行结果（防止重复执行）</li>
-                        <li>发送Telegram通知</li>
-                    </ol>
-                </div>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">🔒 安全机制：</p>
-                <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px;">
-                    <li>✅ 防重复执行：每个持仓的止盈/止损只执行一次</li>
-                    <li>✅ 执行记录：保存到 {account_id}_tpsl_execution.jsonl</li>
-                    <li>✅ 自动重启：PM2确保进程崩溃后自动恢复</li>
-                    <li>✅ 日志记录：详细记录每次检查和执行过程</li>
-                    <li>✅ 实时通知：Telegram推送执行结果</li>
-                </ul>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">📋 配置文件：</p>
-                <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px;">
-                    <li>止盈止损设置：<code>data/okx_tpsl_settings/{account_id}_tpsl.jsonl</code></li>
-                    <li>账户API凭证：<code>data/okx_auto_strategy/{account_id}.json</code></li>
-                    <li>执行记录：<code>data/okx_tpsl_settings/{account_id}_tpsl_execution.jsonl</code></li>
-                </ul>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">🔍 查看运行状态：</p>
-                <div style="background: #1f2937; color: #10b981; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 10px; margin: 6px 0;">
-                    # 查看监控进程<br>
-                    pm2 list | grep okx-tpsl-monitor<br>
-                    <br>
-                    # 查看实时日志<br>
-                    pm2 logs okx-tpsl-monitor --lines 50<br>
-                    <br>
-                    # 日志示例：<br>
-                    [account_main] 📊 DOT-USDT-SWAP long: 盈亏=0.41%<br>
-                    [account_main] 📊 UNI-USDT-SWAP long: 盈亏=-0.75%<br>
-                    [account_main] 🎯 触发止盈: 12.5% >= 12.0%<br>
-                    [account_main] ✅ 止盈设置成功<br>
-                    等待 60 秒后继续...
-                </div>
-                
-                <p style="margin: 10px 0 0 0; padding: 10px; background: #fef3c7; border-radius: 6px; border-left: 3px solid #f59e0b; font-size: 10px;">
-                    <strong>💡 重要提示：</strong><br>
-                    1. 监控进程已经在后台运行，无需手动启动<br>
-                    2. 浏览器中的止盈止损开关只控制前端页面的弹窗提示<br>
-                    3. 后台监控服务读取JSONL配置文件，不受前端开关影响<br>
-                    4. 修改止盈止损阈值后，后台会在下次检查时自动读取新配置<br>
-                    5. 如需临时禁用监控，修改JSONL文件中的 <code>enabled</code> 字段为 <code>false</code>
-                </p>
-                
-                <p style="margin: 10px 0 0 0; padding: 10px; background: #fee2e2; border-radius: 6px; border-left: 3px solid #dc2626; font-size: 10px;">
-                    <strong>⚠️ 注意事项：</strong><br>
-                    1. 确保账户API凭证配置正确（apiKey、apiSecret、passphrase）<br>
-                    2. 确保账户有足够的持仓才会触发止盈止损<br>
-                    3. 监控进程每60秒检查一次，不是实时的（已够快）<br>
-                    4. 市场剧烈波动时可能存在滑点，建议设置合理的止盈止损阈值<br>
-                    5. 详细文档：<code>FIX_BACKEND_AUTOMATION_2026-02-28.md</code>
-                </p>
-            </div>
-        </div>
+
 
         <!-- 系统架构说明（可伸缩） -->
         <div style="margin-top: 10px; padding: 10px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px; border: 2px solid #0ea5e9;">
@@ -2081,6 +1983,154 @@
                 <span id="archToggleIcon" style="color: #0369a1; font-weight: bold; font-size: 14px;">▼</span>
             </div>
             <div id="systemArchitecture" style="margin-top: 12px; max-height: 500px; overflow-y: auto; color: #0c4a6e; font-size: 11px; line-height: 1.8;">
+                
+                <!-- 🔥 v3.4 多账户独立配置修复 (2026-03-07) -->
+                <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);">
+                    <h4 style="margin: 0 0 8px 0; color: #065f46; font-size: 13px; font-weight: 800;">✅ v3.4.0 - 5分钟涨速止盈/正数占比止盈 多账户独立配置（2026-03-07）</h4>
+                    
+                    <!-- 问题描述 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题：4个账户配置联动</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>修改一个账户的涨速阈值/正数占比阈值，其他账户也跟着变化</li>
+                            <li><strong>根因1：</strong>默认账户ID设置错误（account_poit_main不在账户列表中）</li>
+                            <li><strong>根因2：</strong>前端硬编码 {{ account.id }}，切换账户时不会更新API路径</li>
+                            <li><strong>根因3：</strong>部分账户缺少配置文件，导致读取失败回退到默认值</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复内容 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 修复方案（提交：5251d52 + c21ed12）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>修正默认账户：</strong>account_poit_main → account_main</li>
+                            <li><strong>动态账户ID：</strong>所有API调用从 {{ account.id }} 改为 ${account.id}</li>
+                            <li><strong>初始化配置文件：</strong>为所有4个账户创建独立配置文件</li>
+                            <li><strong>账户切换联动：</strong>selectAccount() 自动加载对应账户配置</li>
+                            <li><strong>配置独立存储：</strong>每个账户的配置完全独立，互不影响</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 配置文件结构 -->
+                    <div style="background: #f0fdf4; padding: 10px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #10b981;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #065f46;">📁 配置文件结构：</p>
+                        <pre style="margin: 4px 0; font-family: monospace; font-size: 9px; color: #064e3b;">data/velocity_takeprofit/
+├── account_main_config.json        (主账户)
+├── account_fangfang12_config.json  (Fangfang12)
+├── account_anchor_config.json      (锚点账号)
+└── account_poit_config.json        (POIT)
+
+data/positive_ratio_stoploss/
+├── account_main_config.json
+├── account_fangfang12_config.json
+├── account_anchor_config.json
+└── account_poit_config.json</pre>
+                    </div>
+                    
+                    <!-- 功能验证 -->
+                    <div style="background: #fffbeb; padding: 10px; border-radius: 4px; border-left: 3px solid #f59e0b;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #92400e;">🧪 测试验证：</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #92400e; font-size: 10px;">
+                            <li>✅ 账户切换时自动加载对应配置</li>
+                            <li>✅ 修改一个账户不影响其他账户</li>
+                            <li>✅ 页面刷新后所有配置保持独立</li>
+                            <li>✅ 后端API完全支持多账户参数</li>
+                            <li>✅ UI控件（输入框/开关/状态面板）完全同步</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="margin: 8px 0 0 0; font-size: 10px; color: #065f46; font-weight: 600;">
+                        📌 相关提交：5251d52(涨速多账户) + c21ed12(正数占比多账户) + 版本v3.4.0
+                    </p>
+                </div>
+                
+                <!-- 🔥 v3.0 止盈止损后台自动执行 (2026-02-28) -->
+                <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);">
+                    <h4 style="margin: 0 0 8px 0; color: #065f46; font-size: 13px; font-weight: 800;">✅ v3.0 - 止盈止损后台自动执行 - 无需浏览器打开（2026-02-28）</h4>
+                    
+                    <!-- 问题描述 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题：浏览器依赖</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>止盈止损需要浏览器保持打开，关闭后无法执行</li>
+                            <li><strong>影响：</strong>夜间/外出时无法自动止盈止损，错过最佳平仓时机</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复内容 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 解决方案：后台自动监控服务 - 7×24小时运行</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>监控进程：</strong>okx-tpsl-monitor（PM2守护，崩溃自动重启）</li>
+                            <li><strong>检查频率：</strong>每60秒自动检查所有账户的持仓盈亏</li>
+                            <li><strong>触发机制：</strong>盈亏达到阈值立即执行平仓</li>
+                            <li><strong>完全独立：</strong>不依赖浏览器，关闭浏览器也能执行</li>
+                            <li><strong>双重止盈：</strong>支持普通止盈止损 + 市场情绪紧急止盈</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 监控账户 -->
+                    <div style="background: #f0fdf4; padding: 10px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #10b981;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #065f46;">📊 监控账户（5个）：</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #064e3b;">
+                            <li>account_main（主账户）</li>
+                            <li>account_fangfang12</li>
+                            <li>account_poit_main（POIT子账户）</li>
+                            <li>account_anchor（锚点账户）</li>
+                            <li>account_dadanini（新增）</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 工作流程 -->
+                    <div style="background: #fffbeb; padding: 10px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #f59e0b;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #92400e;">🎯 工作流程：</p>
+                        <ol style="margin: 4px 0 0 20px; padding-left: 0; font-size: 10px; color: #92400e;">
+                            <li>每60秒扫描所有账户</li>
+                            <li>读取止盈止损配置（data/okx_tpsl_settings/）</li>
+                            <li>获取当前持仓并计算盈亏百分比</li>
+                            <li>检查是否触发：
+                                <ul style="margin: 4px 0 0 15px;">
+                                    <li>市场情绪止盈（优先）：检测到极端信号立即平仓</li>
+                                    <li>普通止盈：盈亏% ≥ 止盈阈值</li>
+                                    <li>普通止损：盈亏% ≤ 止损阈值</li>
+                                </ul>
+                            </li>
+                            <li>执行平仓（调用OKX API设置条件单）</li>
+                            <li>记录执行结果（防止重复执行）</li>
+                            <li>发送Telegram通知</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- 安全机制 -->
+                    <div style="background: #fef2f2; padding: 10px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #dc2626;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #991b1b;">🔒 安全机制：</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #991b1b;">
+                            <li>✅ 防重复执行：每个持仓的止盈/止损只执行一次</li>
+                            <li>✅ 执行记录：保存到 {account_id}_tpsl_execution.jsonl</li>
+                            <li>✅ 自动重启：PM2确保进程崩溃后自动恢复</li>
+                            <li>✅ 日志记录：详细记录每次检查和执行过程</li>
+                            <li>✅ 实时通知：Telegram推送执行结果</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 查看状态 -->
+                    <div style="background: #1f2937; color: #10b981; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 9px; margin-bottom: 8px;">
+                        # 查看监控进程<br>
+pm2 list | grep okx-tpsl-monitor<br>
+<br>
+# 查看实时日志<br>
+pm2 logs okx-tpsl-monitor --lines 50<br>
+<br>
+# 日志示例：<br>
+[account_main] 📊 DOT-USDT-SWAP long: 盈亏=0.41%<br>
+[account_main] 🎯 触发止盈: 12.5% >= 12.0%<br>
+[account_main] ✅ 止盈设置成功
+                    </div>
+                    
+                    <p style="margin: 8px 0 0 0; font-size: 10px; color: #065f46; font-weight: 600;">
+                        💡 监控进程已在后台运行，无需手动启动 | 📋 配置文件：data/okx_tpsl_settings/ | 📄 详细文档：FIX_BACKEND_AUTOMATION_2026-02-28.md
+                    </p>
+                </div>
                 
                 <!-- 🔴 重要更新通知 -->
                 <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #dc2626; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);">
@@ -15998,7 +16048,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.4.0-VELOCITY-MULTI-ACCOUNT-20260307-16:15 | 缓存戳: 20260307161500');
+        console.log('🚀 页面版本: v3.5.0-DOCS-REORGANIZE-20260307-16:30 | 缓存戳: 20260307163000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
