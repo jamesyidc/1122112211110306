@@ -1984,6 +1984,199 @@
             </div>
             <div id="systemArchitecture" style="margin-top: 12px; max-height: 500px; overflow-y: auto; color: #0c4a6e; font-size: 11px; line-height: 1.8;">
                 
+                <!-- 🔥🔥🔥 v3.16.1 完整系统备份与部署方案 (2026-03-08) 🔥🔥🔥 -->
+                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 14px; border-radius: 8px; margin-bottom: 14px; border: 3px solid #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                    <h4 style="margin: 0 0 10px 0; color: #92400e; font-size: 14px; font-weight: 900;">🎉 v3.16.1 - 完整系统备份与部署解决方案（2026-03-08）</h4>
+                    
+                    <!-- 备份概览 -->
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #f59e0b;">
+                        <p style="margin: 0 0 8px 0; font-weight: 800; color: #92400e;">📦 备份文件信息</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #78350f; font-size: 10px;">
+                            <li><strong>备份文件：</strong>/tmp/okx_trading_backup_20260307.tar.gz</li>
+                            <li><strong>文件大小：</strong>260 MB（压缩后）→ 3.3 GB（解压后）</li>
+                            <li><strong>压缩率：</strong>92% | <strong>备份时间：</strong>65秒</li>
+                            <li><strong>数据完整性：</strong>✅ 完整数据（非7天数据）</li>
+                            <li><strong>备份脚本：</strong>create_full_backup.sh（可重复执行）</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 备份内容 -->
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <p style="margin: 0 0 8px 0; font-weight: 800; color: #92400e;">📂 备份内容清单</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10px;">
+                            <div style="background: #fef3c7; padding: 8px; border-radius: 4px;">
+                                <p style="margin: 0 0 4px 0; font-weight: 700; color: #78350f;">✅ 核心代码</p>
+                                <ul style="margin: 0; padding-left: 16px; color: #78350f;">
+                                    <li>app.py (5MB) - Flask主应用</li>
+                                    <li>source_code/ (752KB) - 30+模块</li>
+                                    <li>panic_paged_v2/ - V2系统</li>
+                                    <li>panic_v3/ - V3系统</li>
+                                    <li>scripts/ (340KB) - 监控脚本</li>
+                                </ul>
+                            </div>
+                            <div style="background: #fef3c7; padding: 8px; border-radius: 4px;">
+                                <p style="margin: 0 0 4px 0; font-weight: 700; color: #78350f;">✅ 前端代码</p>
+                                <ul style="margin: 0; padding-left: 16px; color: #78350f;">
+                                    <li>templates/ (7.9MB) - 88文件</li>
+                                    <li>static/ - CSS/JS/图片</li>
+                                </ul>
+                                <p style="margin: 8px 0 4px 0; font-weight: 700; color: #78350f;">✅ 配置文件</p>
+                                <ul style="margin: 0; padding-left: 16px; color: #78350f;">
+                                    <li>config/ (164KB)</li>
+                                    <li>requirements.txt</li>
+                                    <li>ecosystem.config.js</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="background: #fed7aa; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                            <p style="margin: 0 0 4px 0; font-weight: 700; color: #78350f;">✅ 数据文件（3.1 GB 完整数据）</p>
+                            <ul style="margin: 0; padding-left: 16px; font-size: 9px; color: #78350f;">
+                                <li>coin_change_tracker/ - 币种变化追踪数据（完整历史JSONL）</li>
+                                <li>positive_ratio_stoploss/ - 5个账户独立配置+历史</li>
+                                <li>okx_auto_strategy/ - 6个账户配置</li>
+                                <li>其他所有数据目录...</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 系统依赖 -->
+                    <div style="background: #fffbeb; padding: 10px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #d97706;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #92400e;">🔧 系统依赖（已导出）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #78350f;">
+                            <li><strong>Python包：</strong>Flask, requests, pandas, python-okx 等（python_packages.txt）</li>
+                            <li><strong>Node.js：</strong>PM2全局安装</li>
+                            <li><strong>系统包：</strong>build-essential, python3-dev, git 等（apt_packages.txt）</li>
+                            <li><strong>PM2进程：</strong>4个守护进程配置（dump.pm2）</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 快速部署 -->
+                    <div style="background: #1f2937; color: #fbbf24; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 9px; margin-bottom: 10px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700;">🚀 快速部署（7步）</p>
+                        # 1. 解压备份<br>
+                        tar xzf okx_trading_backup_20260307.tar.gz<br>
+                        <br>
+                        # 2. 复制到目标<br>
+                        cp -r okx_trading_backup_20260307/webapp/* /home/user/webapp/<br>
+                        <br>
+                        # 3. 安装Python依赖<br>
+                        pip install -r requirements.txt<br>
+                        <br>
+                        # 4. 安装PM2<br>
+                        npm install -g pm2<br>
+                        <br>
+                        # 5. 启动服务<br>
+                        pm2 start app.py --name flask-app --interpreter python3<br>
+                        pm2 start scripts/coin_change_tracker.py --name coin-change-tracker<br>
+                        pm2 start scripts/positive_ratio_monitor.py --name positive-ratio-monitor<br>
+                        pm2 start scripts/positive_ratio_auto_close.py --name positive-ratio-auto-close<br>
+                        <br>
+                        # 6. 保存配置<br>
+                        pm2 save && pm2 startup<br>
+                        <br>
+                        # 7. 验证<br>
+                        pm2 list && curl http://localhost:9002/
+                    </div>
+                    
+                    <!-- 相关文档 -->
+                    <div style="background: white; padding: 10px; border-radius: 6px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #92400e;">📚 相关文档</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #78350f;">
+                            <li><strong>DEPLOYMENT_GUIDE.md</strong> - 完整部署指南（系统要求、部署步骤、故障排查）</li>
+                            <li><strong>BACKUP_SUMMARY_20260308.md</strong> - 备份总结报告（详细清单、架构图）</li>
+                            <li><strong>VERIFICATION_REPORT.md</strong> - 系统独立性验证报告</li>
+                            <li><strong>create_full_backup.sh</strong> - 自动备份脚本</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="margin: 10px 0 0 0; font-size: 10px; color: #78350f; font-weight: 700;">
+                        🎯 Git提交：030c51f | 📦 完整备份已保存到 /tmp/ | 🌐 GitHub: https://github.com/jamesyidc/1122112211110306
+                    </p>
+                </div>
+                
+                <!-- 🔥🔥 v3.15.1 正数占比显示修复与POIT平仓修复 (2026-03-08) 🔥🔥 -->
+                <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #3b82f6; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);">
+                    <h4 style="margin: 0 0 8px 0; color: #1e40af; font-size: 13px; font-weight: 800;">✅ v3.15.1 - 正数占比显示修复 + POIT账户平仓修复（2026-03-08）</h4>
+                    
+                    <!-- 问题1：正数占比显示滞后 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题1：正数占比显示昨天数据</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>3月8日凌晨0点后，系统仍显示3月7日的正数占比（76.97%）</li>
+                            <li><strong>根因：</strong>后端在每天06:00前使用昨天的数据（避免今天数据不足）</li>
+                            <li><strong>用户需求：</strong>跨日后立即使用新一天的实时数据，无需等到06:00</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复1 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 修复方案1：实时切换到新日期数据（提交：c922f92）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>移除06:00逻辑：</strong>删除"06:00前使用昨天数据"的判断</li>
+                            <li><strong>实时切换：</strong>北京时间00:00后立即切换到新日期数据文件</li>
+                            <li><strong>测试结果：</strong>3月8日 02:14，正数占比显示57.8%（109条记录中63条正数）</li>
+                            <li><strong>数据更新：</strong>每75秒自动更新一次，实时反映市场变化</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 问题2：开仓通知显示未知账户 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题2：开仓通知"交易账户: 未知账户"</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>Telegram通知显示"未知账户"而非实际账户名</li>
+                            <li><strong>根因：</strong>对冲下单API调用缺少accountId参数</li>
+                            <li><strong>影响：</strong>无法识别是哪个账户执行的交易</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复2 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 修复方案2：补充accountId参数（提交：9c771f4）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>修改位置：</strong>templates/okx_trading.html 第9771行</li>
+                            <li><strong>添加参数：</strong>accountId: account.id</li>
+                            <li><strong>账户映射：</strong>main→主账户, fangfang12→Fangfang12, poit_main→POIT主账户 等</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 问题3：POIT账户无法平仓 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题3：POIT主账户无法自动平仓</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>正数占比低于40%但未触发平仓（有6个多单持仓）</li>
+                            <li><strong>根因1：</strong>监控脚本从配置文件读取API密钥失败</li>
+                            <li><strong>根因2：</strong>持仓字段名不一致（pos vs posSize）</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复3 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 修复方案3：硬编码API密钥 + 字段兼容（提交：5e799d1）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>硬编码密钥：</strong>在scripts/positive_ratio_auto_close.py中直接写入5个账户的完整API凭证</li>
+                            <li><strong>字段兼容：</strong>使用 pos.get('pos', pos.get('posSize', 0)) 兼容两种字段名</li>
+                            <li><strong>测试结果：</strong>成功平仓POIT主账户的6个多单（CRO, FIL, SUI, APT, NEAR, CFX）</li>
+                            <li><strong>Telegram通知：</strong>发送成功，显示正确的账户名和平仓结果</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 验证结果 -->
+                    <div style="background: #eff6ff; padding: 10px; border-radius: 4px; border-left: 3px solid #3b82f6;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #1e40af;">🧪 完整验证</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #1e3a8a;">
+                            <li>✅ 正数占比实时切换到新日期（57.8% @ 3月8日）</li>
+                            <li>✅ 开仓通知显示正确账户名</li>
+                            <li>✅ POIT主账户自动平仓功能正常</li>
+                            <li>✅ 5个账户完全独立，互不影响</li>
+                            <li>✅ 后台监控每60秒自动运行，不依赖网页</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="margin: 8px 0 0 0; font-size: 10px; color: #1e40af; font-weight: 600;">
+                        📌 相关提交：c922f92(正数占比) + 9c771f4(开仓通知) + 5e799d1(POIT平仓) | 📄 VERIFICATION_REPORT.md
+                    </p>
+                </div>
+                
                 <!-- 🔥 v3.4 多账户独立配置修复 (2026-03-07) -->
                 <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);">
                     <h4 style="margin: 0 0 8px 0; color: #065f46; font-size: 13px; font-weight: 800;">✅ v3.4.0 - 5分钟涨速止盈/正数占比止盈 多账户独立配置（2026-03-07）</h4>
