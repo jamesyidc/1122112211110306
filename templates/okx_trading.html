@@ -3905,6 +3905,9 @@ data/
                                    step="0.5" 
                                    value="40" 
                                    onchange="updatePositiveRatioThreshold(this.value)"
+                                   oninput="updatePositiveRatioThresholdDisplay(this.value)"
+                                   onmouseup="updatePositiveRatioThreshold(this.value)"
+                                   ontouchend="updatePositiveRatioThreshold(this.value)"
                                    style="width: 100%; height: 6px; border-radius: 5px; background: #dbeafe; outline: none;">
                             <div style="display: flex; justify-content: space-between; font-size: 9px; color: #60a5fa; margin-top: 2px;">
                                 <span>30%</span>
@@ -15346,8 +15349,10 @@ ${data.sMsg || result.message || ''}`);
                     console.log('📊 [正数占比] 当前正数占比:', currentRatio + '%');
                     console.log('⚙️ [正数占比] 配置:', config);
                     
-                    // 🔥 同步开关状态到UI
+                    // 🔥 同步配置到UI控件
                     document.getElementById('positiveRatioStoplossSwitch').checked = enabled;
+                    document.getElementById('positiveRatioThresholdSlider').value = threshold;
+                    document.getElementById('positiveRatioThresholdDisplay').textContent = threshold.toFixed(1);
                     
                     // 判断当前状态
                     let currentStatus = currentRatio >= threshold ? 'above' : 'below';
@@ -15443,10 +15448,27 @@ ${data.sMsg || result.message || ''}`);
             }
         }
 
-        // 5. 更新阈值显示
-        function updatePositiveRatioThreshold(value) {
+        // 5. 更新阈值显示（只更新显示，不触发保存）
+        function updatePositiveRatioThresholdDisplay(value) {
             document.getElementById('positiveRatioThresholdDisplay').textContent = parseFloat(value).toFixed(1);
-            togglePositiveRatioStoploss();
+        }
+        
+        // 6. 更新阈值并保存配置
+        let positiveRatioThresholdTimer = null;
+        function updatePositiveRatioThreshold(value) {
+            const displayValue = parseFloat(value).toFixed(1);
+            document.getElementById('positiveRatioThresholdDisplay').textContent = displayValue;
+            console.log(`📊 [正数占比] 阈值调整为: ${displayValue}%`);
+            
+            // 🔥 防抖：延迟300ms执行，避免拖动滑块时频繁保存
+            if (positiveRatioThresholdTimer) {
+                clearTimeout(positiveRatioThresholdTimer);
+            }
+            
+            positiveRatioThresholdTimer = setTimeout(() => {
+                console.log(`💾 [正数占比] 开始保存阈值: ${displayValue}%`);
+                togglePositiveRatioStoploss();
+            }, 300);
         }
 
         // 6. 定时检查并触发
@@ -15917,7 +15939,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.8-INPUT-EVENTS-FIX-20260307-15:10 | 缓存戳: 20260307151000');
+        console.log('🚀 页面版本: v3.1.9-POSITIVE-RATIO-SYNC-20260307-15:30 | 缓存戳: 20260307153000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
