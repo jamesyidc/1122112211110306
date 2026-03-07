@@ -3932,6 +3932,105 @@ data/
                     </div>
                 </div>
 
+                <!-- 5分钟涨速止盈系统 (2026-03-07) -->
+                <div class="info-card" style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="display: flex; align-items: center; gap: 6px;">⚡ 5分钟涨速止盈</span>
+                        <button onclick="refreshVelocityStatus()" 
+                                style="padding: 4px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">
+                            🔄 刷新状态
+                        </button>
+                    </h3>
+                    
+                    <div style="font-size: 11px; color: #92400e; margin-bottom: 12px; padding: 8px; background: rgba(255, 255, 255, 0.6); border-radius: 4px; border-left: 3px solid #f59e0b;">
+                        💡 <strong>说明：</strong>基于5分钟涨速自动止盈。最高涨速超阈值平多单，最低涨速低于阈值平空单
+                    </div>
+                    
+                    <!-- 当前状态显示 -->
+                    <div id="velocityStatusPanel" style="margin-bottom: 12px; padding: 10px; background: rgba(255, 255, 255, 0.8); border-radius: 6px; border: 1px solid #fbbf24;">
+                        <div style="font-size: 12px; font-weight: 600; color: #92400e; margin-bottom: 8px;">📊 当前涨速</div>
+                        <div id="velocityStatusContent" style="font-size: 11px; color: #78350f; line-height: 1.8;">
+                            <div style="text-align: center; padding: 10px; color: #d97706;">⏳ 正在加载...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 多单止盈设置 -->
+                    <div style="padding: 10px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border: 1px solid #22c55e; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #15803d; font-weight: 600; font-size: 13px;">🟢 多单止盈</span>
+                            <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                                <input type="checkbox" id="velocityLongSwitch" onclick="toggleVelocityLong()" style="opacity: 0; width: 0; height: 0;">
+                                <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px;"></span>
+                            </label>
+                        </div>
+                        
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 11px; color: #15803d; font-weight: 600; display: block; margin-bottom: 4px;">
+                                最高涨速阈值: <span id="velocityLongThresholdDisplay" style="color: #22c55e;">+15.0</span>%
+                            </label>
+                            <input type="range" 
+                                   id="velocityLongThresholdSlider" 
+                                   min="5" 
+                                   max="30" 
+                                   step="0.5" 
+                                   value="15" 
+                                   onchange="updateVelocityLongThreshold(this.value)"
+                                   style="width: 100%; height: 6px; border-radius: 5px; background: #dcfce7; outline: none;">
+                            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #22c55e; margin-top: 2px;">
+                                <span>+5%</span>
+                                <span>+15%</span>
+                                <span>+30%</span>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 10px; color: #15803d; margin-top: 8px;">
+                            <strong>逻辑：</strong>当前最高涨速 > 阈值 → 平掉所有多单
+                        </div>
+                    </div>
+                    
+                    <!-- 空单止盈设置 -->
+                    <div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid #ef4444;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #991b1b; font-weight: 600; font-size: 13px;">🔴 空单止盈</span>
+                            <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                                <input type="checkbox" id="velocityShortSwitch" onclick="toggleVelocityShort()" style="opacity: 0; width: 0; height: 0;">
+                                <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px;"></span>
+                            </label>
+                        </div>
+                        
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 11px; color: #991b1b; font-weight: 600; display: block; margin-bottom: 4px;">
+                                最低涨速阈值: <span id="velocityShortThresholdDisplay" style="color: #ef4444;">-15.0</span>%
+                            </label>
+                            <input type="range" 
+                                   id="velocityShortThresholdSlider" 
+                                   min="-30" 
+                                   max="-5" 
+                                   step="0.5" 
+                                   value="-15" 
+                                   onchange="updateVelocityShortThreshold(this.value)"
+                                   style="width: 100%; height: 6px; border-radius: 5px; background: #fee2e2; outline: none;">
+                            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #ef4444; margin-top: 2px;">
+                                <span>-30%</span>
+                                <span>-15%</span>
+                                <span>-5%</span>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 10px; color: #991b1b; margin-top: 8px;">
+                            <strong>逻辑：</strong>当前最低涨速 < 阈值 → 平掉所有空单
+                        </div>
+                    </div>
+                    
+                    <!-- 单次执行选项 -->
+                    <div style="margin-top: 10px; padding: 6px; background: rgba(255, 255, 255, 0.5); border-radius: 4px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #92400e; cursor: pointer;">
+                            <input type="checkbox" id="velocityAllowOnce" checked style="width: 14px; height: 14px;">
+                            <span>触发后自动关闭（需手动重置）</span>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- RSI自动开仓策略（独立卡片） -->
                 <div class="info-card" style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b;">
                     <h3 style="color: #92400e; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
@@ -15415,10 +15514,317 @@ ${data.sMsg || result.message || ''}`);
 
         console.log('✅ [正数占比] JavaScript代码已加载');
     </script>
+
+    <!-- ==================== 5分钟涨速止盈系统 JavaScript (2026-03-07) ==================== -->
+    <script>
+        console.log('🚀 [5分钟涨速止盈] 开始加载...');
+
+        // 全局变量
+        let velocityCheckInterval = null;
+
+        /**
+         * 初始化5分钟涨速止盈系统
+         */
+        async function initVelocityTakeprofitSystem() {
+            console.log('📊 [5分钟涨速止盈] 初始化系统...');
+            
+            try {
+                // 加载配置
+                await loadVelocityConfig();
+                
+                // 刷新状态
+                await refreshVelocityStatus();
+                
+                // 启动定时检查（每30秒）
+                if (velocityCheckInterval) {
+                    clearInterval(velocityCheckInterval);
+                }
+                velocityCheckInterval = setInterval(async () => {
+                    console.log('⏰ [5分钟涨速止盈] 定时检查...');
+                    await refreshVelocityStatus();
+                }, 30000);
+                
+                console.log('✅ [5分钟涨速止盈] 系统初始化完成');
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 初始化失败:', error);
+            }
+        }
+
+        /**
+         * 加载配置
+         */
+        async function loadVelocityConfig() {
+            console.log('📥 [5分钟涨速止盈] 加载配置...');
+            
+            try {
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`);
+                const data = await response.json();
+                
+                if (data.success && data.config) {
+                    const config = data.config;
+                    console.log('✅ [5分钟涨速止盈] 配置加载成功:', config);
+                    
+                    // 更新UI
+                    document.getElementById('velocityLongEnabled').checked = config.long_enabled || false;
+                    document.getElementById('velocityShortEnabled').checked = config.short_enabled || false;
+                    document.getElementById('velocityLongThreshold').value = config.max_velocity_threshold || 15.0;
+                    document.getElementById('velocityShortThreshold').value = config.min_velocity_threshold || -15.0;
+                    document.getElementById('velocityLongThresholdDisplay').textContent = (config.max_velocity_threshold || 15.0).toFixed(1);
+                    document.getElementById('velocityShortThresholdDisplay').textContent = (config.min_velocity_threshold || -15.0).toFixed(1);
+                    document.getElementById('velocityAutoClose').checked = config.auto_close || false;
+                } else {
+                    console.warn('⚠️ [5分钟涨速止盈] 配置加载失败，使用默认值');
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 加载配置异常:', error);
+            }
+        }
+
+        /**
+         * 刷新状态
+         */
+        async function refreshVelocityStatus() {
+            console.log('🔄 [5分钟涨速止盈] 刷新状态...');
+            
+            try {
+                // 获取配置
+                const configResponse = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`);
+                const configData = await configResponse.json();
+                
+                if (!configData.success || !configData.config) {
+                    console.error('❌ [5分钟涨速止盈] 获取配置失败');
+                    return;
+                }
+                
+                const config = configData.config;
+                const currentVelocity = config.current_velocity || 0;
+                const longThreshold = config.max_velocity_threshold || 15.0;
+                const shortThreshold = config.min_velocity_threshold || -15.0;
+                const longEnabled = config.long_enabled || false;
+                const shortEnabled = config.short_enabled || false;
+                const longPermission = config.long_permission !== false;
+                const shortPermission = config.short_permission !== false;
+                
+                // 构建状态HTML
+                let statusHtml = `
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-size: 18px; font-weight: bold; color: white;">当前5分钟涨速</span>
+                            <span style="font-size: 24px; font-weight: bold; color: ${currentVelocity >= 0 ? '#4ade80' : '#f87171'};">
+                                ${currentVelocity >= 0 ? '+' : ''}${currentVelocity.toFixed(2)}%
+                            </span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.9);">
+                            <div>
+                                <span>做多止盈阈值:</span>
+                                <span style="font-weight: bold; color: #4ade80;">+${longThreshold.toFixed(1)}%</span>
+                            </div>
+                            <div>
+                                <span>做空止盈阈值:</span>
+                                <span style="font-weight: bold; color: #f87171;">${shortThreshold.toFixed(1)}%</span>
+                            </div>
+                            <div>
+                                <span>做多止盈:</span>
+                                <span style="font-weight: bold;">${longEnabled ? '🟢 已启用' : '⚫ 未启用'}</span>
+                            </div>
+                            <div>
+                                <span>做空止盈:</span>
+                                <span style="font-weight: bold;">${shortEnabled ? '🟢 已启用' : '⚫ 未启用'}</span>
+                            </div>
+                            <div>
+                                <span>做多执行权限:</span>
+                                <span style="font-weight: bold; color: ${longPermission ? '#4ade80' : '#f87171'};">
+                                    ${longPermission ? '✅ 允许' : '🚫 已锁定'}
+                                </span>
+                            </div>
+                            <div>
+                                <span>做空执行权限:</span>
+                                <span style="font-weight: bold; color: ${shortPermission ? '#4ade80' : '#f87171'};">
+                                    ${shortPermission ? '✅ 允许' : '🚫 已锁定'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 添加预期动作提示
+                let actionHtml = '';
+                if (longEnabled && currentVelocity >= longThreshold && longPermission) {
+                    actionHtml = '<div style="background: #4ade80; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold;">⬆️ 涨速超过阈值，即将平掉所有多单！</div>';
+                } else if (shortEnabled && currentVelocity <= shortThreshold && shortPermission) {
+                    actionHtml = '<div style="background: #f87171; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold;">⬇️ 跌速超过阈值，即将平掉所有空单！</div>';
+                } else if ((longEnabled && !longPermission) || (shortEnabled && !shortPermission)) {
+                    actionHtml = '<div style="background: #f59e0b; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold;">🔒 执行权限已锁定，需手动解锁</div>';
+                } else if (!longEnabled && !shortEnabled) {
+                    actionHtml = '<div style="background: #6b7280; color: white; padding: 10px; border-radius: 5px; text-align: center;">⚪ 系统未启用</div>';
+                } else {
+                    actionHtml = '<div style="background: #3b82f6; color: white; padding: 10px; border-radius: 5px; text-align: center;">📊 监控中...</div>';
+                }
+                
+                document.getElementById('velocityStatusPanel').innerHTML = statusHtml + actionHtml;
+                
+                console.log('✅ [5分钟涨速止盈] 状态刷新完成');
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 刷新状态异常:', error);
+                document.getElementById('velocityStatusPanel').innerHTML = '<div style="background: #ef4444; color: white; padding: 10px; border-radius: 5px; text-align: center;">❌ 状态刷新失败</div>';
+            }
+        }
+
+        /**
+         * 切换做多止盈开关
+         */
+        async function toggleVelocityLong() {
+            const enabled = document.getElementById('velocityLongEnabled').checked;
+            console.log(`🔄 [5分钟涨速止盈] 切换做多止盈: ${enabled ? '启用' : '关闭'}`);
+            
+            try {
+                const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
+                const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
+                const shortEnabled = document.getElementById('velocityShortEnabled').checked;
+                const autoClose = document.getElementById('velocityAutoClose').checked;
+                
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        long_enabled: enabled,
+                        short_enabled: shortEnabled,
+                        max_velocity_threshold: longThreshold,
+                        min_velocity_threshold: shortThreshold,
+                        auto_close: autoClose
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ [5分钟涨速止盈] 做多止盈配置保存成功');
+                    showNotification(`✅ 做多止盈已${enabled ? '启用' : '关闭'}`);
+                    await refreshVelocityStatus();
+                } else {
+                    console.error('❌ [5分钟涨速止盈] 保存配置失败:', data.message);
+                    showNotification('❌ 保存配置失败: ' + (data.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 切换做多止盈异常:', error);
+                showNotification('❌ 操作失败: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * 切换做空止盈开关
+         */
+        async function toggleVelocityShort() {
+            const enabled = document.getElementById('velocityShortEnabled').checked;
+            console.log(`🔄 [5分钟涨速止盈] 切换做空止盈: ${enabled ? '启用' : '关闭'}`);
+            
+            try {
+                const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
+                const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
+                const longEnabled = document.getElementById('velocityLongEnabled').checked;
+                const autoClose = document.getElementById('velocityAutoClose').checked;
+                
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        long_enabled: longEnabled,
+                        short_enabled: enabled,
+                        max_velocity_threshold: longThreshold,
+                        min_velocity_threshold: shortThreshold,
+                        auto_close: autoClose
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ [5分钟涨速止盈] 做空止盈配置保存成功');
+                    showNotification(`✅ 做空止盈已${enabled ? '启用' : '关闭'}`);
+                    await refreshVelocityStatus();
+                } else {
+                    console.error('❌ [5分钟涨速止盈] 保存配置失败:', data.message);
+                    showNotification('❌ 保存配置失败: ' + (data.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 切换做空止盈异常:', error);
+                showNotification('❌ 操作失败: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * 更新做多阈值显示
+         */
+        function updateVelocityLongThreshold() {
+            const value = parseFloat(document.getElementById('velocityLongThreshold').value);
+            document.getElementById('velocityLongThresholdDisplay').textContent = value.toFixed(1);
+            console.log(`📊 [5分钟涨速止盈] 做多阈值更新: +${value.toFixed(1)}%`);
+            toggleVelocityLong();
+        }
+
+        /**
+         * 更新做空阈值显示
+         */
+        function updateVelocityShortThreshold() {
+            const value = parseFloat(document.getElementById('velocityShortThreshold').value);
+            document.getElementById('velocityShortThresholdDisplay').textContent = value.toFixed(1);
+            console.log(`📊 [5分钟涨速止盈] 做空阈值更新: ${value.toFixed(1)}%`);
+            toggleVelocityShort();
+        }
+
+        /**
+         * 手动刷新状态
+         */
+        async function refreshVelocityTakeprofitStatus() {
+            console.log('🔄 [5分钟涨速止盈] 手动刷新状态...');
+            showNotification('🔄 正在刷新状态...');
+            await refreshVelocityStatus();
+            showNotification('✅ 状态刷新完成');
+        }
+
+        /**
+         * 解锁执行权限
+         */
+        async function unlockVelocityPermissions() {
+            console.log('🔓 [5分钟涨速止盈] 解锁执行权限...');
+            
+            try {
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        long_permission: true,
+                        short_permission: true
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ [5分钟涨速止盈] 执行权限已解锁');
+                    showNotification('✅ 执行权限已解锁');
+                    await refreshVelocityStatus();
+                } else {
+                    console.error('❌ [5分钟涨速止盈] 解锁失败:', data.message);
+                    showNotification('❌ 解锁失败: ' + (data.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 解锁异常:', error);
+                showNotification('❌ 解锁失败: ' + error.message, 'error');
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 [5分钟涨速止盈] DOMContentLoaded，延迟1秒后初始化...');
+            setTimeout(() => {
+                initVelocityTakeprofitSystem();
+            }, 1000);
+        });
+
+        console.log('✅ [5分钟涨速止盈] JavaScript代码已加载');
+    </script>
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.0.0-POSITIVE-RATIO-20260307-13:10 | 缓存戳: 20260307131000');
+        console.log('🚀 页面版本: v3.1.0-VELOCITY-TAKEPROFIT-20260307-13:30 | 缓存戳: 20260307133000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
