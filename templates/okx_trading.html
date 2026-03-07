@@ -7621,7 +7621,8 @@ data/
                         apiSecret: account.apiSecret,
                         passphrase: account.passphrase,
                         instId: instId,
-                        posSide: posSide
+                        posSide: posSide,
+                        accountId: account.id
                     })
                 });
                 
@@ -9213,7 +9214,8 @@ data/
                                     passphrase: account.passphrase,
                                     instId: position.instId,
                                     posSide: position.posSide,
-                                    closeSize: position.posSize
+                                    closeSize: position.posSize,
+                                    accountId: account.id
                                 })
                             });
                             
@@ -9325,7 +9327,8 @@ data/
                                                 passphrase: account.passphrase,
                                                 instId: position.instId,
                                                 posSide: position.posSide,
-                                                closeSize: position.posSize
+                                                closeSize: position.posSize,
+                                                accountId: account.id
                                             })
                                         });
                                         
@@ -9569,7 +9572,8 @@ data/
                                 passphrase: account.passphrase,
                                 instId: position.instId,
                                 posSide: posSideForClose,  // 使用正确的posSide
-                                closeSize: closeSize  // 指定平仓数量
+                                closeSize: closeSize,  // 指定平仓数量
+                                accountId: account.id
                             })
                         });
                         

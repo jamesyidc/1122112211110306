@@ -10559,7 +10559,9 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             'account_main': '主账户',
             'account_fangfang12': 'Fangfang12',
             'account_anchor': '锚点账号',
-            'account_poit': 'POIT'
+            'account_poit': 'POIT',
+            'account_poit_main': 'POIT主账户',
+            'account_dadanini': 'Dadanini'
         }
         account_name = account_names.get(account_id, account_id) if account_id else '未知账户'
         
@@ -10595,6 +10597,7 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             message = f"""
 {emoji} <b>OKX止盈触发</b>
 
+📋 <b>交易账户:</b> {account_name}
 📊 <b>交易对:</b> {inst_id}
 💰 <b>盈亏:</b> {pnl:.2f} USDT ({pnl_percent:+.2f}%)
 💵 <b>平仓价:</b> {price:.4f}
@@ -10609,6 +10612,7 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             message = f"""
 {emoji} <b>OKX止损触发</b>
 
+📋 <b>交易账户:</b> {account_name}
 📊 <b>交易对:</b> {inst_id}
 💰 <b>盈亏:</b> {pnl:.2f} USDT ({pnl_percent:+.2f}%)
 💵 <b>平仓价:</b> {price:.4f}
@@ -10624,6 +10628,7 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             message = f"""
 {emoji} <b>OKX手动平仓</b>
 
+📋 <b>交易账户:</b> {account_name}
 📊 <b>交易对:</b> {inst_id}
 💰 <b>盈亏:</b> {pnl:.2f} USDT ({pnl_percent:+.2f}%)
 📍 <b>平仓价:</b> {avg_price:.4f}
@@ -20788,7 +20793,7 @@ def close_okx_position():
                     'avgPrice': avg_price,
                     'pnl': pnl,
                     'pnlPercent': pnl_percent
-                })
+                }, account_id=data.get('accountId'))
                 
                 # 📊 记录盈亏到统计文件
                 try:
