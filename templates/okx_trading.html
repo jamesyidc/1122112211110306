@@ -3966,25 +3966,23 @@ data/
                         
                         <div style="margin-top: 10px;">
                             <label style="font-size: 11px; color: #15803d; font-weight: 600; display: block; margin-bottom: 4px;">
-                                最高涨速阈值: <span id="velocityLongThresholdDisplay" style="color: #22c55e;">+15.0</span>%
+                                最高涨速阈值 (5% ~ 30%):
                             </label>
-                            <input type="range" 
-                                   id="velocityLongThresholdSlider" 
-                                   min="5" 
-                                   max="30" 
-                                   step="0.5" 
-                                   value="15" 
-                                   onchange="updateVelocityLongThreshold(this.value)"
-                                   style="width: 100%; height: 6px; border-radius: 5px; background: #dcfce7; outline: none;">
-                            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #22c55e; margin-top: 2px;">
-                                <span>+5%</span>
-                                <span>+15%</span>
-                                <span>+30%</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="number" 
+                                       id="velocityLongThreshold" 
+                                       min="5" 
+                                       max="30" 
+                                       step="0.5" 
+                                       value="15" 
+                                       onchange="updateVelocityLongThreshold()"
+                                       style="width: 80px; padding: 6px 8px; border: 2px solid #22c55e; border-radius: 6px; font-size: 13px; font-weight: 600; color: #15803d; background: white; text-align: center;">
+                                <span style="color: #22c55e; font-weight: 600; font-size: 13px;">%</span>
                             </div>
                         </div>
                         
                         <div style="font-size: 10px; color: #15803d; margin-top: 8px;">
-                            <strong>逻辑：</strong>当前最高涨速 > 阈值 → 平掉所有多单
+                            <strong>逻辑：</strong>当前5分钟涨速 ≥ 阈值 → 平掉所有多单
                         </div>
                     </div>
                     
@@ -4000,25 +3998,23 @@ data/
                         
                         <div style="margin-top: 10px;">
                             <label style="font-size: 11px; color: #991b1b; font-weight: 600; display: block; margin-bottom: 4px;">
-                                最低涨速阈值: <span id="velocityShortThresholdDisplay" style="color: #ef4444;">-15.0</span>%
+                                最低涨速阈值 (-30% ~ -5%):
                             </label>
-                            <input type="range" 
-                                   id="velocityShortThresholdSlider" 
-                                   min="-30" 
-                                   max="-5" 
-                                   step="0.5" 
-                                   value="-15" 
-                                   onchange="updateVelocityShortThreshold(this.value)"
-                                   style="width: 100%; height: 6px; border-radius: 5px; background: #fee2e2; outline: none;">
-                            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #ef4444; margin-top: 2px;">
-                                <span>-30%</span>
-                                <span>-15%</span>
-                                <span>-5%</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="number" 
+                                       id="velocityShortThreshold" 
+                                       min="-30" 
+                                       max="-5" 
+                                       step="0.5" 
+                                       value="-15" 
+                                       onchange="updateVelocityShortThreshold()"
+                                       style="width: 80px; padding: 6px 8px; border: 2px solid #ef4444; border-radius: 6px; font-size: 13px; font-weight: 600; color: #991b1b; background: white; text-align: center;">
+                                <span style="color: #ef4444; font-weight: 600; font-size: 13px;">%</span>
                             </div>
                         </div>
                         
                         <div style="font-size: 10px; color: #991b1b; margin-top: 8px;">
-                            <strong>逻辑：</strong>当前最低涨速 < 阈值 → 平掉所有空单
+                            <strong>逻辑：</strong>当前5分钟涨速 ≤ 阈值 → 平掉所有空单
                         </div>
                     </div>
                     
@@ -15569,8 +15565,6 @@ ${data.sMsg || result.message || ''}`);
                     document.getElementById('velocityShortEnabled').checked = config.short_enabled || false;
                     document.getElementById('velocityLongThreshold').value = config.max_velocity_threshold || 15.0;
                     document.getElementById('velocityShortThreshold').value = config.min_velocity_threshold || -15.0;
-                    document.getElementById('velocityLongThresholdDisplay').textContent = (config.max_velocity_threshold || 15.0).toFixed(1);
-                    document.getElementById('velocityShortThresholdDisplay').textContent = (config.min_velocity_threshold || -15.0).toFixed(1);
                     document.getElementById('velocityAutoClose').checked = config.auto_close || false;
                 } else {
                     console.warn('⚠️ [5分钟涨速止盈] 配置加载失败，使用默认值');
@@ -15751,21 +15745,19 @@ ${data.sMsg || result.message || ''}`);
         }
 
         /**
-         * 更新做多阈值显示
+         * 更新做多阈值
          */
         function updateVelocityLongThreshold() {
             const value = parseFloat(document.getElementById('velocityLongThreshold').value);
-            document.getElementById('velocityLongThresholdDisplay').textContent = value.toFixed(1);
             console.log(`📊 [5分钟涨速止盈] 做多阈值更新: +${value.toFixed(1)}%`);
             toggleVelocityLong();
         }
 
         /**
-         * 更新做空阈值显示
+         * 更新做空阈值
          */
         function updateVelocityShortThreshold() {
             const value = parseFloat(document.getElementById('velocityShortThreshold').value);
-            document.getElementById('velocityShortThresholdDisplay').textContent = value.toFixed(1);
             console.log(`📊 [5分钟涨速止盈] 做空阈值更新: ${value.toFixed(1)}%`);
             toggleVelocityShort();
         }
@@ -15824,7 +15816,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.1-POSITIVE-RATIO-FIX-20260307-13:50 | 缓存戳: 20260307135000');
+        console.log('🚀 页面版本: v3.1.2-INPUT-CONTROLS-20260307-14:00 | 缓存戳: 20260307140000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
