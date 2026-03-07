@@ -8602,7 +8602,6 @@ data/
                             apiSecret: account.apiSecret,
                             passphrase: account.passphrase,
                             accountId: account.id,  // 添加账户ID用于TG通知
-                            accountId: account.id,  // 添加账户ID用于TG通知
                             ...orderData
                         })
                     });
@@ -9768,6 +9767,7 @@ data/
                                 apiKey: account.apiKey,
                                 apiSecret: account.apiSecret,
                                 passphrase: account.passphrase,
+                                accountId: account.id,  // ✅ 添加账户ID用于TG通知
                                 ...orderData
                             })
                         });
