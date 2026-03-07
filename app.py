@@ -31516,6 +31516,25 @@ def velocity_takeprofit_config(account_id):
                 'last_check_time': None
             }
         
+        # 🔥 从coin-change-tracker获取当前5分钟涨速
+        try:
+            import requests
+            response = requests.get('http://localhost:9002/api/coin-change-tracker/velocity-history?limit=1', timeout=2)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('success') and data.get('data') and len(data['data']) > 0:
+                    latest = data['data'][0]
+                    current_velocity = float(latest.get('velocity_5min', 0))
+                    config['current_velocity'] = round(current_velocity, 2)
+                else:
+                    config['current_velocity'] = 0.0
+            else:
+                config['current_velocity'] = 0.0
+        except Exception as e:
+            print(f"❌ 获取5分钟涨速失败: {e}")
+            config['current_velocity'] = 0.0
+        
         return jsonify({
             'success': True,
             'config': config
