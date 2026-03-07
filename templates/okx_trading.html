@@ -15404,23 +15404,41 @@ ${data.sMsg || result.message || ''}`);
             statusContent.innerHTML = '<div style="text-align: center; padding: 10px; color: #60a5fa;">⏳ 正在加载...</div>';
             
             try {
-                // 获取当前正数占比
-                const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
-                const ratioResponse = await fetch(`/api/coin-change-tracker/positive-ratio-stats?date=${today}`);
-                const ratioData = await ratioResponse.json();
+                // 🔧 获取当前正数占比 - 从最新的涨跌数据中计算
+                const latestResponse = await fetch('/api/coin-change-tracker/latest-change');
+                const latestData = await latestResponse.json();
+                
+                let currentRatio = 0;
+                if (latestData.success && latestData.data && latestData.data.changes) {
+                    const changes = latestData.data.changes;
+                    let positiveCount = 0;
+                    let totalCount = 0;
+                    
+                    for (const [coin, info] of Object.entries(changes)) {
+                        if (info.change_pct > 0) positiveCount++;
+                        totalCount++;
+                    }
+                    
+                    currentRatio = totalCount > 0 ? (positiveCount / totalCount) * 100 : 0;
+                    console.log('📊 [正数占比] 计算结果:', {
+                        positiveCount,
+                        totalCount,
+                        currentRatio: currentRatio.toFixed(2) + '%'
+                    });
+                }
                 
                 // 获取配置
                 const configResponse = await fetch(`/api/okx-trading/positive-ratio-stoploss/config/${account.id}`);
                 const configData = await configResponse.json();
                 
-                if (ratioData.success && configData.success) {
-                    const currentRatio = ratioData.stats.positive_ratio || 0;
+                if (configData.success) {
+                    // currentRatio 已经在上面计算好了
                     const config = configData.config;
                     const threshold = config.threshold || 40;
                     const enabled = config.enabled === true;  // 🔥 严格比较，避免 || 运算符问题
                     const lastStatus = config.last_status || 'unknown';
                     
-                    console.log('📊 [正数占比] 当前正数占比:', currentRatio + '%');
+                    console.log('📊 [正数占比] 当前正数占比:', currentRatio.toFixed(2) + '%');
                     console.log('⚙️ [正数占比] 配置:', config);
                     console.log('🔍 [正数占比] enabled 值:', enabled, '(原始值:', config.enabled, ')');
                     
