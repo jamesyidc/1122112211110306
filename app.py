@@ -25112,9 +25112,35 @@ def get_positive_ratio_stats():
                 'error': '数据目录不存在'
             })
         
-        # 如果没有指定日期,使用今天
+        # 如果没有指定日期,智能选择日期
         if not date_str:
             beijing_time = datetime.now(timezone(timedelta(hours=8)))
+            
+            # 如果是凌晨6点之前,使用昨天的数据(因为今天数据还不够完整)
+            if beijing_time.hour < 6:
+                beijing_time = beijing_time - timedelta(days=1)
+                print(f"[正数占比API] 当前北京时间 {beijing_time.strftime('%H:%M')} 在6点前,使用昨天数据")
+            else:
+                # 检查今天的数据文件是否有足够的数据
+                today_file_date = beijing_time.strftime('%Y%m%d')
+                today_file = data_dir / f'coin_change_{today_file_date}.jsonl'
+                
+                if today_file.exists():
+                    # 快速统计今天的数据行数
+                    with open(today_file, 'r') as f:
+                        today_count = sum(1 for line in f if line.strip())
+                    
+                    # 如果今天的数据少于200条(约4小时数据),使用昨天的完整数据
+                    if today_count < 200:
+                        beijing_time = beijing_time - timedelta(days=1)
+                        print(f"[正数占比API] 今天数据仅 {today_count} 条(<200),使用昨天完整数据")
+                    else:
+                        print(f"[正数占比API] 今天数据已有 {today_count} 条,使用今天数据")
+                else:
+                    # 今天文件不存在,使用昨天
+                    beijing_time = beijing_time - timedelta(days=1)
+                    print(f"[正数占比API] 今天数据文件不存在,使用昨天数据")
+            
             file_date_str = beijing_time.strftime('%Y%m%d')
         else:
             # 支持两种格式:YYYY-MM-DD 或 YYYYMMDD
