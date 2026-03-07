@@ -36,6 +36,50 @@ class PositiveRatioAutoClose:
     
     def __init__(self):
         self.accounts = self.load_all_accounts()
+        self.load_telegram_config()
+    
+    def load_telegram_config(self):
+        """加载Telegram配置"""
+        try:
+            config_file = Path('/home/user/webapp/config/configs/telegram_config.json')
+            if config_file.exists():
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    tg_config = json.load(f)
+                    self.tg_bot_token = tg_config.get('bot_token')
+                    self.tg_chat_id = tg_config.get('chat_id')
+                    logger.info(f"✅ Telegram配置加载成功")
+            else:
+                self.tg_bot_token = None
+                self.tg_chat_id = None
+                logger.warning(f"⚠️ Telegram配置文件不存在")
+        except Exception as e:
+            self.tg_bot_token = None
+            self.tg_chat_id = None
+            logger.error(f"❌ 加载Telegram配置失败: {e}")
+    
+    def send_telegram(self, message):
+        """发送Telegram消息"""
+        if not self.tg_bot_token or not self.tg_chat_id:
+            logger.warning("⚠️ Telegram未配置，跳过发送")
+            return False
+        
+        try:
+            url = f"https://api.telegram.org/bot{self.tg_bot_token}/sendMessage"
+            data = {
+                'chat_id': self.tg_chat_id,
+                'text': message,
+                'parse_mode': 'HTML'
+            }
+            
+            response = requests.post(url, data=data, timeout=10)
+            response.raise_for_status()
+            
+            logger.info("✅ Telegram消息发送成功")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Telegram消息发送失败: {e}")
+            return False
         
     def load_all_accounts(self):
         """加载所有启用的账户配置"""
@@ -234,6 +278,45 @@ class PositiveRatioAutoClose:
             logger.info(f"\n{'='*60}")
             logger.info(f"📊 平仓完成: 成功 {success_count} 个，失败 {fail_count} 个")
             logger.info(f"{'='*60}")
+            
+            # 发送Telegram通知
+            if success_count > 0 or fail_count > 0:
+                account_names = {
+                    'account_main': '主账户',
+                    'account_fangfang12': 'Fangfang12',
+                    'account_anchor': '锚点账号',
+                    'account_poit': 'POIT',
+                    'account_poit_main': 'POIT主账户',
+                    'account_dadanini': 'Dadanini'
+                }
+                account_name = account_names.get(account_id, account_id)
+                direction_text = '多单' if direction == 'long' else '空单'
+                
+                # 获取当前正数占比
+                try:
+                    ratio_response = requests.get(f'{API_BASE_URL}/api/coin-change-tracker/positive-ratio-stats', timeout=5)
+                    ratio_data = ratio_response.json()
+                    current_ratio = ratio_data.get('stats', {}).get('positive_ratio', 0)
+                except:
+                    current_ratio = 0
+                
+                tg_message = f"""
+🔥 <b>正数占比自动平仓通知</b>
+
+━━━━━━━━━━━━━━━━━━
+📋 <b>交易账户:</b> {account_name}
+📊 <b>当前正数占比:</b> {current_ratio:.2f}%
+⚡ <b>平仓方向:</b> {direction_text}
+━━━━━━━━━━━━━━━━━━
+
+📈 <b>平仓结果:</b>
+  ✅ 成功: {success_count} 个
+  ❌ 失败: {fail_count} 个
+
+⏰ 时间: {datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M:%S')}
+"""
+                
+                self.send_telegram(tg_message)
             
         except Exception as e:
             logger.error(f"❌ 平仓执行失败: {e}")
