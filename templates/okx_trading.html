@@ -15602,6 +15602,12 @@ ${data.sMsg || result.message || ''}`);
                 const longPermission = config.long_permission !== false;
                 const shortPermission = config.short_permission !== false;
                 
+                // 🔴 同步更新下面的输入框和开关
+                document.getElementById('velocityLongEnabled').checked = longEnabled;
+                document.getElementById('velocityShortEnabled').checked = shortEnabled;
+                document.getElementById('velocityLongThreshold').value = longThreshold;
+                document.getElementById('velocityShortThreshold').value = shortThreshold;
+                
                 // 构建状态HTML
                 let statusHtml = `
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
@@ -15879,7 +15885,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.6-CHECKBOX-ID-FIX-20260307-14:40 | 缓存戳: 20260307144000');
+        console.log('🚀 页面版本: v3.1.7-CONFIG-SYNC-FIX-20260307-14:50 | 缓存戳: 20260307145000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
