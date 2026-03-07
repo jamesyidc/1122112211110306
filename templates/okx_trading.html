@@ -15492,13 +15492,22 @@ ${data.sMsg || result.message || ''}`);
                         nextAction = '<div style="color: #94a3b8; margin-top: 4px;">⏹️ 系统已关闭</div>';
                     }
                     
+                    const updateTime = new Date().toLocaleString('zh-CN', { 
+                        hour12: false,
+                        year: 'numeric',
+                        month: '2-digit', 
+                        day: '2-digit',
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    });
+                    
                     statusContent.innerHTML = `
                         <div style="display: flex; flex-direction: column; gap: 6px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #64748b;">当前正数占比：</span>
                                 <strong style="color: #3b82f6; font-size: 15px;">${currentRatio.toFixed(2)}%</strong>
                             </div>
-                            ${dataDate ? `<div style="font-size: 11px; color: #94a3b8; text-align: right; margin-top: -4px;">数据日期: ${dataDate.slice(0,4)}-${dataDate.slice(4,6)}-${dataDate.slice(6,8)}</div>` : ''}
+                            ${dataDate ? `<div style="font-size: 11px; color: #94a3b8; text-align: right; margin-top: -4px;">数据日期: ${dataDate.slice(0,4)}-${dataDate.slice(4,6)}-${dataDate.slice(6,8)} | 更新: ${updateTime}</div>` : ''}
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: #64748b;">设定阈值：</span>
                                 <strong style="color: #f59e0b;">${threshold.toFixed(1)}%</strong>
