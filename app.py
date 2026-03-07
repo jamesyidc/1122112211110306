@@ -20542,6 +20542,10 @@ def close_okx_position():
         inst_id = data.get('instId', '')
         pos_side = data.get('posSide', '')  # long/short/net
         close_size = data.get('closeSize', None)  # 平仓数量(张数),None=全部平仓
+        account_id = data.get('accountId', None)  # 🔧 提取账户ID
+        
+        # 🔍 调试日志
+        print(f"[close_okx_position] 收到平仓请求: instId={inst_id}, posSide={pos_side}, accountId={account_id}")
         
         if not api_key or not secret_key or not passphrase:
             return jsonify({
@@ -20793,7 +20797,7 @@ def close_okx_position():
                     'avgPrice': avg_price,
                     'pnl': pnl,
                     'pnlPercent': pnl_percent
-                }, account_id=data.get('accountId'))
+                }, account_id=account_id)
                 
                 # 📊 记录盈亏到统计文件
                 try:
