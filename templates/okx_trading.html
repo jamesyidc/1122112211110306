@@ -3976,6 +3976,8 @@ data/
                                        step="0.5" 
                                        value="15" 
                                        onchange="updateVelocityLongThreshold()"
+                                       onblur="updateVelocityLongThreshold()"
+                                       onkeypress="if(event.keyCode===13) updateVelocityLongThreshold()"
                                        style="width: 80px; padding: 6px 8px; border: 2px solid #22c55e; border-radius: 6px; font-size: 13px; font-weight: 600; color: #15803d; background: white; text-align: center;">
                                 <span style="color: #22c55e; font-weight: 600; font-size: 13px;">%</span>
                             </div>
@@ -4008,6 +4010,8 @@ data/
                                        step="0.5" 
                                        value="-15" 
                                        onchange="updateVelocityShortThreshold()"
+                                       onblur="updateVelocityShortThreshold()"
+                                       onkeypress="if(event.keyCode===13) updateVelocityShortThreshold()"
                                        style="width: 80px; padding: 6px 8px; border: 2px solid #ef4444; border-radius: 6px; font-size: 13px; font-weight: 600; color: #991b1b; background: white; text-align: center;">
                                 <span style="color: #ef4444; font-weight: 600; font-size: 13px;">%</span>
                             </div>
@@ -15756,79 +15760,107 @@ ${data.sMsg || result.message || ''}`);
         /**
          * 更新做多阈值
          */
+        let velocityLongThresholdTimer = null;
         async function updateVelocityLongThreshold() {
             const value = parseFloat(document.getElementById('velocityLongThreshold').value);
-            console.log(`📊 [5分钟涨速止盈] 做多阈值更新: +${value.toFixed(1)}%`);
+            console.log(`📊 [5分钟涨速止盈] 做多阈值输入: +${value.toFixed(1)}%`);
             
-            // 🔥 直接保存配置，不依赖开关状态
-            try {
-                const longEnabled = document.getElementById('velocityLongEnabled').checked;
-                const shortEnabled = document.getElementById('velocityShortEnabled').checked;
-                const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
-                const autoClose = document.getElementById('velocityAllowOnce').checked;
-                
-                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        long_enabled: longEnabled,
-                        short_enabled: shortEnabled,
-                        max_velocity_threshold: value,
-                        min_velocity_threshold: shortThreshold,
-                        auto_close: autoClose
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    console.log('✅ [5分钟涨速止盈] 做多阈值保存成功');
-                    showNotification(`✅ 做多阈值已更新为 +${value.toFixed(1)}%`);
-                    await refreshVelocityStatus();
-                } else {
-                    console.error('❌ [5分钟涨速止盈] 保存失败:', data.message);
-                }
-            } catch (error) {
-                console.error('❌ [5分钟涨速止盈] 更新做多阈值异常:', error);
+            // 🔥 防抖：延迟500ms执行，避免频繁请求
+            if (velocityLongThresholdTimer) {
+                clearTimeout(velocityLongThresholdTimer);
             }
+            
+            velocityLongThresholdTimer = setTimeout(async () => {
+                console.log(`💾 [5分钟涨速止盈] 开始保存做多阈值: +${value.toFixed(1)}%`);
+                
+                // 🔥 直接保存配置，不依赖开关状态
+                try {
+                    const longEnabled = document.getElementById('velocityLongEnabled').checked;
+                    const shortEnabled = document.getElementById('velocityShortEnabled').checked;
+                    const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
+                    const autoClose = document.getElementById('velocityAllowOnce') ? document.getElementById('velocityAllowOnce').checked : false;
+                    
+                    console.log(`📤 [5分钟涨速止盈] 提交配置: long=${longEnabled}, short=${shortEnabled}, longThreshold=${value}, shortThreshold=${shortThreshold}`);
+                    
+                    const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            long_enabled: longEnabled,
+                            short_enabled: shortEnabled,
+                            max_velocity_threshold: value,
+                            min_velocity_threshold: shortThreshold,
+                            auto_close: autoClose
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        console.log('✅ [5分钟涨速止盈] 做多阈值保存成功');
+                        showNotification(`✅ 做多阈值已更新为 +${value.toFixed(1)}%`);
+                        await refreshVelocityStatus();
+                    } else {
+                        console.error('❌ [5分钟涨速止盈] 保存失败:', data.message);
+                        showNotification('❌ 保存失败: ' + (data.message || '未知错误'), 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ [5分钟涨速止盈] 更新做多阈值异常:', error);
+                    showNotification('❌ 保存失败: ' + error.message, 'error');
+                }
+            }, 500);
         }
 
         /**
          * 更新做空阈值
          */
+        let velocityShortThresholdTimer = null;
         async function updateVelocityShortThreshold() {
             const value = parseFloat(document.getElementById('velocityShortThreshold').value);
-            console.log(`📊 [5分钟涨速止盈] 做空阈值更新: ${value.toFixed(1)}%`);
+            console.log(`📊 [5分钟涨速止盈] 做空阈值输入: ${value.toFixed(1)}%`);
             
-            // 🔥 直接保存配置，不依赖开关状态
-            try {
-                const longEnabled = document.getElementById('velocityLongEnabled').checked;
-                const shortEnabled = document.getElementById('velocityShortEnabled').checked;
-                const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
-                const autoClose = document.getElementById('velocityAllowOnce').checked;
-                
-                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        long_enabled: longEnabled,
-                        short_enabled: shortEnabled,
-                        max_velocity_threshold: longThreshold,
-                        min_velocity_threshold: value,
-                        auto_close: autoClose
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    console.log('✅ [5分钟涨速止盈] 做空阈值保存成功');
-                    showNotification(`✅ 做空阈值已更新为 ${value.toFixed(1)}%`);
-                    await refreshVelocityStatus();
-                } else {
-                    console.error('❌ [5分钟涨速止盈] 保存失败:', data.message);
-                }
-            } catch (error) {
-                console.error('❌ [5分钟涨速止盈] 更新做空阈值异常:', error);
+            // 🔥 防抖：延迟500ms执行，避免频繁请求
+            if (velocityShortThresholdTimer) {
+                clearTimeout(velocityShortThresholdTimer);
             }
+            
+            velocityShortThresholdTimer = setTimeout(async () => {
+                console.log(`💾 [5分钟涨速止盈] 开始保存做空阈值: ${value.toFixed(1)}%`);
+                
+                // 🔥 直接保存配置，不依赖开关状态
+                try {
+                    const longEnabled = document.getElementById('velocityLongEnabled').checked;
+                    const shortEnabled = document.getElementById('velocityShortEnabled').checked;
+                    const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
+                    const autoClose = document.getElementById('velocityAllowOnce') ? document.getElementById('velocityAllowOnce').checked : false;
+                    
+                    console.log(`📤 [5分钟涨速止盈] 提交配置: long=${longEnabled}, short=${shortEnabled}, longThreshold=${longThreshold}, shortThreshold=${value}`);
+                    
+                    const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            long_enabled: longEnabled,
+                            short_enabled: shortEnabled,
+                            max_velocity_threshold: longThreshold,
+                            min_velocity_threshold: value,
+                            auto_close: autoClose
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        console.log('✅ [5分钟涨速止盈] 做空阈值保存成功');
+                        showNotification(`✅ 做空阈值已更新为 ${value.toFixed(1)}%`);
+                        await refreshVelocityStatus();
+                    } else {
+                        console.error('❌ [5分钟涨速止盈] 保存失败:', data.message);
+                        showNotification('❌ 保存失败: ' + (data.message || '未知错误'), 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ [5分钟涨速止盈] 更新做空阈值异常:', error);
+                    showNotification('❌ 保存失败: ' + error.message, 'error');
+                }
+            }, 500);
         }
 
         /**
@@ -15885,7 +15917,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.7-CONFIG-SYNC-FIX-20260307-14:50 | 缓存戳: 20260307145000');
+        console.log('🚀 页面版本: v3.1.8-INPUT-EVENTS-FIX-20260307-15:10 | 缓存戳: 20260307151000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
