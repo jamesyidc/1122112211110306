@@ -31800,3 +31800,322 @@ def velocity_takeprofit_reset_permission(account_id):
         'config': config
     })
 
+# ============================================
+# 5分钟涨速止盈系统 API
+# 2026-03-07
+# 功能：基于5分钟涨速的最高/最低值自动止盈
+# ============================================
+
+@app.route('/api/okx-trading/velocity-takeprofit/config/<account_id>', methods=['GET', 'POST'])
+def velocity_takeprofit_config(account_id):
+    """
+    5分钟涨速止盈配置API
+    
+    GET: 获取配置
+    POST: 保存配置
+    
+    配置参数:
+    - long_enabled: 多单止盈是否启用 (boolean)
+    - short_enabled: 空单止盈是否启用 (boolean)
+    - max_velocity_threshold: 最高涨速阈值（触发多单止盈）
+    - min_velocity_threshold: 最低涨速阈值（触发空单止盈）
+    - long_permission: 多单执行权限 (boolean)
+    - short_permission: 空单执行权限 (boolean)
+    """
+    import json
+    from pathlib import Path
+    from datetime import datetime, timezone, timedelta
+    
+    config_dir = Path('/home/user/webapp/data/velocity_takeprofit')
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_file = config_dir / f'{account_id}_config.json'
+    
+    if request.method == 'GET':
+        # 读取配置
+        if config_file.exists():
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        else:
+            # 默认配置
+            config = {
+                'long_enabled': False,
+                'short_enabled': False,
+                'max_velocity_threshold': 15.0,  # 最高涨速阈值（多单止盈）
+                'min_velocity_threshold': -15.0,  # 最低涨速阈值（空单止盈）
+                'long_permission': True,   # 多单执行权限
+                'short_permission': True,  # 空单执行权限
+                'last_check_time': None
+            }
+        
+        return jsonify({
+            'success': True,
+            'config': config
+        })
+    
+    elif request.method == 'POST':
+        # 保存配置
+        data = request.get_json()
+        
+        # 读取现有配置（保留权限状态）
+        if config_file.exists():
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        else:
+            config = {
+                'long_permission': True,
+                'short_permission': True,
+                'last_check_time': None
+            }
+        
+        # 更新配置
+        config['long_enabled'] = data.get('long_enabled', False)
+        config['short_enabled'] = data.get('short_enabled', False)
+        config['max_velocity_threshold'] = data.get('max_velocity_threshold', 15.0)
+        config['min_velocity_threshold'] = data.get('min_velocity_threshold', -15.0)
+        
+        # 保存配置
+        with open(config_file, 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=2)
+        
+        # 记录到JSONL历史
+        history_file = config_dir / f'{account_id}_history.jsonl'
+        beijing_time = datetime.now(timezone(timedelta(hours=8)))
+        history_record = {
+            'timestamp': beijing_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'action': 'config_update',
+            'long_enabled': config['long_enabled'],
+            'short_enabled': config['short_enabled'],
+            'max_velocity_threshold': config['max_velocity_threshold'],
+            'min_velocity_threshold': config['min_velocity_threshold']
+        }
+        with open(history_file, 'a', encoding='utf-8') as f:
+            json.dump(history_record, f, ensure_ascii=False)
+            f.write('\n')
+        
+        return jsonify({
+            'success': True,
+            'config': config
+        })
+
+
+@app.route('/api/okx-trading/velocity-takeprofit/reset-permission/<account_id>', methods=['POST'])
+def velocity_takeprofit_reset_permission(account_id):
+    """
+    重置执行权限
+    
+    参数:
+    - type: "long" | "short" | "both"
+    """
+    import json
+    from pathlib import Path
+    from datetime import datetime, timezone, timedelta
+    
+    config_dir = Path('/home/user/webapp/data/velocity_takeprofit')
+    config_file = config_dir / f'{account_id}_config.json'
+    
+    if not config_file.exists():
+        return jsonify({
+            'success': False,
+            'error': '配置不存在'
+        })
+    
+    data = request.get_json()
+    reset_type = data.get('type', 'both')  # "long" | "short" | "both"
+    
+    # 读取配置
+    with open(config_file, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+    
+    # 重置权限
+    if reset_type in ['long', 'both']:
+        config['long_permission'] = True
+    if reset_type in ['short', 'both']:
+        config['short_permission'] = True
+    
+    # 保存配置
+    with open(config_file, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+    
+    # 记录到JSONL历史
+    history_file = config_dir / f'{account_id}_history.jsonl'
+    beijing_time = datetime.now(timezone(timedelta(hours=8)))
+    history_record = {
+        'timestamp': beijing_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'action': 'reset_permission',
+        'reset_type': reset_type,
+        'long_permission': config['long_permission'],
+        'short_permission': config['short_permission']
+    }
+    with open(history_file, 'a', encoding='utf-8') as f:
+        json.dump(history_record, f, ensure_ascii=False)
+        f.write('\n')
+    
+    return jsonify({
+        'success': True,
+        'message': f'权限已重置: {reset_type}',
+        'config': config
+    })
+
+
+@app.route('/api/okx-trading/velocity-takeprofit/check/<account_id>', methods=['POST'])
+def velocity_takeprofit_check(account_id):
+    """
+    检查5分钟涨速并执行止盈
+    
+    返回:
+    - action: "close_long" | "close_short" | "none"
+    - trigger: 是否触发
+    - current_velocity: 当前5分钟涨速
+    - max_threshold: 多单止盈阈值
+    - min_threshold: 空单止盈阈值
+    """
+    import json
+    from pathlib import Path
+    from datetime import datetime, timezone, timedelta
+    
+    config_dir = Path('/home/user/webapp/data/velocity_takeprofit')
+    config_file = config_dir / f'{account_id}_config.json'
+    
+    # 读取配置
+    if not config_file.exists():
+        return jsonify({
+            'success': False,
+            'error': '配置不存在，请先配置'
+        })
+    
+    with open(config_file, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+    
+    # 获取当前5分钟涨速
+    try:
+        import requests
+        response = requests.get('http://localhost:9002/api/coin-change-tracker/velocity-history')
+        velocity_data = response.json()
+        
+        if not velocity_data.get('success'):
+            return jsonify({
+                'success': False,
+                'error': '无法获取涨速数据'
+            })
+        
+        # 获取最新的涨速值
+        data_points = velocity_data.get('data', [])
+        if not data_points:
+            return jsonify({
+                'success': False,
+                'error': '涨速数据为空'
+            })
+        
+        # 找到最新的非空涨速值
+        current_velocity = None
+        for point in reversed(data_points):
+            if point.get('velocity_5min') is not None:
+                current_velocity = point['velocity_5min']
+                break
+        
+        if current_velocity is None:
+            return jsonify({
+                'success': False,
+                'error': '无有效涨速数据'
+            })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'获取涨速数据失败: {str(e)}'
+        })
+    
+    max_threshold = config.get('max_velocity_threshold', 15.0)
+    min_threshold = config.get('min_velocity_threshold', -15.0)
+    long_enabled = config.get('long_enabled', False)
+    short_enabled = config.get('short_enabled', False)
+    long_permission = config.get('long_permission', True)
+    short_permission = config.get('short_permission', True)
+    
+    # 判断是否触发
+    action = 'none'
+    trigger = False
+    reason = ''
+    
+    # 检查多单止盈：当前涨速 > 最高涨速阈值
+    if long_enabled and long_permission and current_velocity > max_threshold:
+        action = 'close_long'
+        trigger = True
+        reason = f'5分钟涨速 {current_velocity:.2f}% > 阈值 {max_threshold:.2f}%，触发多单止盈'
+        # 取消多单执行权限
+        config['long_permission'] = False
+    
+    # 检查空单止盈：当前涨速 < 最低涨速阈值
+    elif short_enabled and short_permission and current_velocity < min_threshold:
+        action = 'close_short'
+        trigger = True
+        reason = f'5分钟涨速 {current_velocity:.2f}% < 阈值 {min_threshold:.2f}%，触发空单止盈'
+        # 取消空单执行权限
+        config['short_permission'] = False
+    
+    # 更新最后检查时间
+    beijing_time = datetime.now(timezone(timedelta(hours=8)))
+    config['last_check_time'] = beijing_time.strftime('%Y-%m-%d %H:%M:%S')
+    
+    # 保存更新后的配置
+    with open(config_file, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+    
+    # 记录到JSONL历史
+    history_file = config_dir / f'{account_id}_history.jsonl'
+    history_record = {
+        'timestamp': beijing_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'action': 'check',
+        'trigger': trigger,
+        'takeprofit_action': action,
+        'current_velocity': current_velocity,
+        'max_threshold': max_threshold,
+        'min_threshold': min_threshold,
+        'reason': reason if trigger else 'No trigger'
+    }
+    with open(history_file, 'a', encoding='utf-8') as f:
+        json.dump(history_record, f, ensure_ascii=False)
+        f.write('\n')
+    
+    return jsonify({
+        'success': True,
+        'trigger': trigger,
+        'action': action,
+        'current_velocity': current_velocity,
+        'max_threshold': max_threshold,
+        'min_threshold': min_threshold,
+        'long_permission': config['long_permission'],
+        'short_permission': config['short_permission'],
+        'reason': reason if trigger else '未触发',
+        'config': config
+    })
+
+
+@app.route('/api/okx-trading/velocity-takeprofit/history/<account_id>', methods=['GET'])
+def velocity_takeprofit_history(account_id):
+    """获取5分钟涨速止盈历史记录"""
+    import json
+    from pathlib import Path
+    
+    config_dir = Path('/home/user/webapp/data/velocity_takeprofit')
+    history_file = config_dir / f'{account_id}_history.jsonl'
+    
+    if not history_file.exists():
+        return jsonify({
+            'success': True,
+            'history': []
+        })
+    
+    # 读取历史记录（最近100条）
+    history = []
+    with open(history_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        for line in lines[-100:]:
+            if line.strip():
+                history.append(json.loads(line.strip()))
+    
+    return jsonify({
+        'success': True,
+        'history': history
+    })
+
