@@ -3959,7 +3959,7 @@ data/
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                             <span style="color: #15803d; font-weight: 600; font-size: 13px;">🟢 多单止盈</span>
                             <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px;">
-                                <input type="checkbox" id="velocityLongSwitch" onclick="toggleVelocityLong()" style="opacity: 0; width: 0; height: 0;">
+                                <input type="checkbox" id="velocityLongEnabled" onclick="toggleVelocityLong()" style="opacity: 0; width: 0; height: 0;">
                                 <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px;"></span>
                             </label>
                         </div>
@@ -3991,7 +3991,7 @@ data/
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                             <span style="color: #991b1b; font-weight: 600; font-size: 13px;">🔴 空单止盈</span>
                             <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px;">
-                                <input type="checkbox" id="velocityShortSwitch" onclick="toggleVelocityShort()" style="opacity: 0; width: 0; height: 0;">
+                                <input type="checkbox" id="velocityShortEnabled" onclick="toggleVelocityShort()" style="opacity: 0; width: 0; height: 0;">
                                 <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px;"></span>
                             </label>
                         </div>
@@ -15750,19 +15750,79 @@ ${data.sMsg || result.message || ''}`);
         /**
          * 更新做多阈值
          */
-        function updateVelocityLongThreshold() {
+        async function updateVelocityLongThreshold() {
             const value = parseFloat(document.getElementById('velocityLongThreshold').value);
             console.log(`📊 [5分钟涨速止盈] 做多阈值更新: +${value.toFixed(1)}%`);
-            toggleVelocityLong();
+            
+            // 🔥 直接保存配置，不依赖开关状态
+            try {
+                const longEnabled = document.getElementById('velocityLongEnabled').checked;
+                const shortEnabled = document.getElementById('velocityShortEnabled').checked;
+                const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
+                const autoClose = document.getElementById('velocityAutoClose').checked;
+                
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/main`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        long_enabled: longEnabled,
+                        short_enabled: shortEnabled,
+                        max_velocity_threshold: value,
+                        min_velocity_threshold: shortThreshold,
+                        auto_close: autoClose
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ [5分钟涨速止盈] 做多阈值保存成功');
+                    showNotification(`✅ 做多阈值已更新为 +${value.toFixed(1)}%`);
+                    await refreshVelocityStatus();
+                } else {
+                    console.error('❌ [5分钟涨速止盈] 保存失败:', data.message);
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 更新做多阈值异常:', error);
+            }
         }
 
         /**
          * 更新做空阈值
          */
-        function updateVelocityShortThreshold() {
+        async function updateVelocityShortThreshold() {
             const value = parseFloat(document.getElementById('velocityShortThreshold').value);
             console.log(`📊 [5分钟涨速止盈] 做空阈值更新: ${value.toFixed(1)}%`);
-            toggleVelocityShort();
+            
+            // 🔥 直接保存配置，不依赖开关状态
+            try {
+                const longEnabled = document.getElementById('velocityLongEnabled').checked;
+                const shortEnabled = document.getElementById('velocityShortEnabled').checked;
+                const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
+                const autoClose = document.getElementById('velocityAutoClose').checked;
+                
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/main`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        long_enabled: longEnabled,
+                        short_enabled: shortEnabled,
+                        max_velocity_threshold: longThreshold,
+                        min_velocity_threshold: value,
+                        auto_close: autoClose
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ [5分钟涨速止盈] 做空阈值保存成功');
+                    showNotification(`✅ 做空阈值已更新为 ${value.toFixed(1)}%`);
+                    await refreshVelocityStatus();
+                } else {
+                    console.error('❌ [5分钟涨速止盈] 保存失败:', data.message);
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 更新做空阈值异常:', error);
+            }
         }
 
         /**
@@ -15819,7 +15879,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.3-SWITCH-SYNC-FIX-20260307-14:10 | 缓存戳: 20260307141000');
+        console.log('🚀 页面版本: v3.1.4-THRESHOLD-SAVE-FIX-20260307-14:20 | 缓存戳: 20260307142000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
