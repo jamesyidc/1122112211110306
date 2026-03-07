@@ -22,6 +22,35 @@ CHECK_INTERVAL = 60  # 检查间隔：60秒
 API_BASE_URL = "http://localhost:9002"
 DATA_DIR = Path('/home/user/webapp/data/positive_ratio_stoploss')
 
+# 硬编码API密钥
+ACCOUNT_API_KEYS = {
+    'account_main': {
+        'apiKey': 'b0c18f2d-e014-4ae8-9c3c-cb02161de4db',
+        'apiSecret': '92F864C599B2CE2EC5186AD14C8B4110',
+        'passphrase': 'Tencent@123'
+    },
+    'account_fangfang12': {
+        'apiKey': 'fbb2cb97-6d01-41ad-9c56-00ad03ba4ffe',
+        'apiSecret': 'C8E82B23B1D7C6B6F3C0E0D5AD95DC6F',
+        'passphrase': 'Tencent@123'
+    },
+    'account_poit_main': {
+        'apiKey': '8650e46c-059b-431d-93cf-55f8c79babdb',
+        'apiSecret': '4C2BD2AC6A08615EA7F36A6251857FCE',
+        'passphrase': 'Wu666666.'
+    },
+    'account_dadanini': {
+        'apiKey': '1463198a-fad0-46ac-9ad8-2a386461782c',
+        'apiSecret': '1D112283B7456290056C253C56E9F3A6',
+        'passphrase': 'Tencent@123'
+    },
+    'account_anchor': {
+        'apiKey': '0b05a729-40eb-4806-9b53-c21db80a6d3a',
+        'apiSecret': '4E4DA8BE3B18D01AA07185A006BF9F8E',
+        'passphrase': 'Tencent@123'
+    }
+}
+
 # 日志配置
 logging.basicConfig(
     level=logging.INFO,
@@ -167,34 +196,20 @@ class PositiveRatioAutoClose:
             logger.info(f"🚀 开始平仓: {account_id} - {'多单' if direction == 'long' else '空单'}")
             logger.info(f"{'='*60}")
             
-            # 1. 获取持仓
+            # 1. 获取API密钥（硬编码）
+            if account_id not in ACCOUNT_API_KEYS:
+                logger.error(f"❌ 账户 {account_id} 没有配置API密钥")
+                return
+            
+            api_credentials = ACCOUNT_API_KEYS[account_id]
+            api_key = api_credentials['apiKey']
+            api_secret = api_credentials['apiSecret']
+            passphrase = api_credentials['passphrase']
+            
+            logger.info(f"✅ 使用硬编码API密钥: {api_key[:8]}...")
+            
+            # 2. 获取持仓
             positions_url = f"{API_BASE_URL}/api/okx-trading/positions"
-            
-            # 从配置文件获取API密钥
-            config_file = DATA_DIR / f'{account_id}_config.json'
-            if config_file.exists():
-                with open(config_file, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-                    # 配置文件可能没有API密钥，需要从auto_strategy读取
-            
-            # 尝试从auto_strategy配置读取API密钥
-            auto_config_file = Path(f'/home/user/webapp/data/okx_auto_strategy/{account_id}.json')
-            if not auto_config_file.exists():
-                logger.error(f"❌ 找不到API配置: {auto_config_file}")
-                return
-            
-            with open(auto_config_file, 'r', encoding='utf-8') as f:
-                auto_config = json.load(f)
-            
-            api_key = auto_config.get('apiKey')
-            api_secret = auto_config.get('apiSecret')
-            passphrase = auto_config.get('passphrase')
-            
-            if not all([api_key, api_secret, passphrase]):
-                logger.error(f"❌ API密钥不完整")
-                return
-            
-            # 获取持仓
             positions_response = requests.post(
                 positions_url,
                 json={
@@ -212,12 +227,14 @@ class PositiveRatioAutoClose:
                 return
             
             positions = positions_data.get('data', [])
+            logger.info(f"📊 总持仓数: {len(positions)}")
             
             # 筛选需要平仓的持仓
             target_positions = []
             for pos in positions:
                 pos_side = pos.get('posSide', '')
-                pos_amt = float(pos.get('pos', 0))
+                # 尝试多个字段名
+                pos_amt = float(pos.get('pos', pos.get('posSize', 0)))
                 
                 if pos_amt == 0:
                     continue
@@ -232,19 +249,24 @@ class PositiveRatioAutoClose:
                 return
             
             logger.info(f"📋 找到 {len(target_positions)} 个持仓需要平仓")
+            for pos in target_positions:
+                inst_id = pos.get('instId')
+                pos_amt = pos.get('pos', pos.get('posSize', 0))
+                logger.info(f"  • {inst_id}: {pos_amt}")
             
-            # 2. 批量平仓
+            # 3. 批量平仓
             close_url = f"{API_BASE_URL}/api/okx-trading/close-position"
             success_count = 0
             fail_count = 0
+            closed_positions = []
             
             for pos in target_positions:
                 inst_id = pos.get('instId')
                 pos_side = pos.get('posSide')
-                pos_amt = pos.get('pos')
+                pos_amt = pos.get('pos', pos.get('posSize', 0))
                 
                 try:
-                    logger.info(f"🔄 平仓: {inst_id} {pos_side} {pos_amt}")
+                    logger.info(f"\n🔄 平仓: {inst_id} {pos_side} {pos_amt}")
                     
                     close_response = requests.post(
                         close_url,
@@ -261,22 +283,26 @@ class PositiveRatioAutoClose:
                     close_response.raise_for_status()
                     close_result = close_response.json()
                     
+                    logger.info(f"   响应: {json.dumps(close_result, ensure_ascii=False)}")
+                    
                     if close_result.get('success'):
                         success_count += 1
-                        logger.info(f"✅ {inst_id} 平仓成功")
+                        closed_positions.append(inst_id)
+                        logger.info(f"   ✅ {inst_id} 平仓成功")
                     else:
                         fail_count += 1
-                        logger.error(f"❌ {inst_id} 平仓失败: {close_result.get('error')}")
+                        logger.error(f"   ❌ {inst_id} 平仓失败: {close_result.get('error')}")
                     
                     # 延迟避免请求过快
-                    time.sleep(0.2)
+                    time.sleep(0.5)
                     
                 except Exception as e:
                     fail_count += 1
-                    logger.error(f"❌ {inst_id} 平仓异常: {e}")
+                    logger.error(f"   ❌ {inst_id} 平仓异常: {e}")
             
             logger.info(f"\n{'='*60}")
             logger.info(f"📊 平仓完成: 成功 {success_count} 个，失败 {fail_count} 个")
+            logger.info(f"   已平仓: {', '.join(closed_positions)}")
             logger.info(f"{'='*60}")
             
             # 发送Telegram通知
