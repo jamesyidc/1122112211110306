@@ -15568,7 +15568,7 @@ ${data.sMsg || result.message || ''}`);
                     document.getElementById('velocityShortEnabled').checked = config.short_enabled || false;
                     document.getElementById('velocityLongThreshold').value = config.max_velocity_threshold || 15.0;
                     document.getElementById('velocityShortThreshold').value = config.min_velocity_threshold || -15.0;
-                    document.getElementById('velocityAutoClose').checked = config.auto_close || false;
+                    document.getElementById('velocityAllowOnce').checked = config.auto_close || false;
                 } else {
                     console.warn('⚠️ [5分钟涨速止盈] 配置加载失败，使用默认值');
                 }
@@ -15678,7 +15678,7 @@ ${data.sMsg || result.message || ''}`);
                 const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
                 const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
                 const shortEnabled = document.getElementById('velocityShortEnabled').checked;
-                const autoClose = document.getElementById('velocityAutoClose').checked;
+                const autoClose = document.getElementById('velocityAllowOnce').checked;
                 
                 const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
                     method: 'POST',
@@ -15718,7 +15718,7 @@ ${data.sMsg || result.message || ''}`);
                 const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
                 const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
                 const longEnabled = document.getElementById('velocityLongEnabled').checked;
-                const autoClose = document.getElementById('velocityAutoClose').checked;
+                const autoClose = document.getElementById('velocityAllowOnce').checked;
                 
                 const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
                     method: 'POST',
@@ -15759,7 +15759,7 @@ ${data.sMsg || result.message || ''}`);
                 const longEnabled = document.getElementById('velocityLongEnabled').checked;
                 const shortEnabled = document.getElementById('velocityShortEnabled').checked;
                 const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
-                const autoClose = document.getElementById('velocityAutoClose').checked;
+                const autoClose = document.getElementById('velocityAllowOnce').checked;
                 
                 const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
                     method: 'POST',
@@ -15798,7 +15798,7 @@ ${data.sMsg || result.message || ''}`);
                 const longEnabled = document.getElementById('velocityLongEnabled').checked;
                 const shortEnabled = document.getElementById('velocityShortEnabled').checked;
                 const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
-                const autoClose = document.getElementById('velocityAutoClose').checked;
+                const autoClose = document.getElementById('velocityAllowOnce').checked;
                 
                 const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
                     method: 'POST',
@@ -15879,7 +15879,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.5-ACCOUNT-ID-FIX-20260307-14:30 | 缓存戳: 20260307143000');
+        console.log('🚀 页面版本: v3.1.6-CHECKBOX-ID-FIX-20260307-14:40 | 缓存戳: 20260307144000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
