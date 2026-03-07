@@ -31210,9 +31210,6 @@ def test_prediction_display():
     return render_template('test_prediction_display.html')
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9002, debug=False)
-
 # 测试页面：对冲底仓开关测试
 @app.route('/test-midnight-hedge')
 def test_midnight_hedge():
@@ -31790,4 +31787,8 @@ def velocity_takeprofit_history(account_id):
         'success': True,
         'history': history
     })
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=9002, debug=False)
 
