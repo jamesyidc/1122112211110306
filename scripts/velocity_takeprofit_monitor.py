@@ -107,15 +107,15 @@ def get_positions(account_id):
         with open(config_file, 'r') as f:
             account_config = json.load(f)
         
-        api_key = account_config.get('api_key')
-        api_secret = account_config.get('api_secret')
+        api_key = account_config.get('apiKey')
+        api_secret = account_config.get('apiSecret')
         passphrase = account_config.get('passphrase')
         
         response = requests.post(
             f'{API_BASE_URL}/api/okx-trading/positions',
             json={
-                'api_key': api_key,
-                'api_secret': api_secret,
+                'apiKey': api_key,
+                'apiSecret': api_secret,
                 'passphrase': passphrase
             },
             timeout=10
@@ -139,8 +139,8 @@ def close_positions(account_id, positions, side):
         with open(config_file, 'r') as f:
             account_config = json.load(f)
         
-        api_key = account_config.get('api_key')
-        api_secret = account_config.get('api_secret')
+        api_key = account_config.get('apiKey')
+        api_secret = account_config.get('apiSecret')
         passphrase = account_config.get('passphrase')
         
         success_count = 0
@@ -159,12 +159,12 @@ def close_positions(account_id, positions, side):
             response = requests.post(
                 f'{API_BASE_URL}/api/okx-trading/close-position',
                 json={
-                    'api_key': api_key,
-                    'api_secret': api_secret,
+                    'apiKey': api_key,
+                    'apiSecret': api_secret,
                     'passphrase': passphrase,
-                    'inst_id': inst_id,
-                    'pos_side': side,
-                    'size': str(pos_size)
+                    'instId': inst_id,
+                    'posSide': side,
+                    'closeSize': str(pos_size)
                 },
                 timeout=10
             )
