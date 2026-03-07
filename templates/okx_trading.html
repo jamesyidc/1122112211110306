@@ -15761,7 +15761,7 @@ ${data.sMsg || result.message || ''}`);
                 const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
                 const autoClose = document.getElementById('velocityAutoClose').checked;
                 
-                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/main`, {
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -15800,7 +15800,7 @@ ${data.sMsg || result.message || ''}`);
                 const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
                 const autoClose = document.getElementById('velocityAutoClose').checked;
                 
-                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/main`, {
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/{{ account.id }}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -15879,7 +15879,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.4-THRESHOLD-SAVE-FIX-20260307-14:20 | 缓存戳: 20260307142000');
+        console.log('🚀 页面版本: v3.1.5-ACCOUNT-ID-FIX-20260307-14:30 | 缓存戳: 20260307143000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
