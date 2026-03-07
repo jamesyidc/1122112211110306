@@ -15219,7 +15219,9 @@ def okx_trading():
     """OKX实盘交易系统"""
     # 添加时间戳参数强制刷新
     version = str(int(time.time()))
-    response = make_response(render_template('okx_trading.html', cache_buster=version))
+    # 🔥 添加account对象
+    account = {'id': 'main', 'name': 'Main Account'}
+    response = make_response(render_template('okx_trading.html', cache_buster=version, account=account))
     # 禁用所有缓存
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
     response.headers['Pragma'] = 'no-cache'
