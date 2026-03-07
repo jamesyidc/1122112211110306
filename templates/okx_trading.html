@@ -15343,16 +15343,19 @@ ${data.sMsg || result.message || ''}`);
                     const currentRatio = ratioData.stats.positive_ratio || 0;
                     const config = configData.config;
                     const threshold = config.threshold || 40;
-                    const enabled = config.enabled || false;
+                    const enabled = config.enabled === true;  // 🔥 严格比较，避免 || 运算符问题
                     const lastStatus = config.last_status || 'unknown';
                     
                     console.log('📊 [正数占比] 当前正数占比:', currentRatio + '%');
                     console.log('⚙️ [正数占比] 配置:', config);
+                    console.log('🔍 [正数占比] enabled 值:', enabled, '(原始值:', config.enabled, ')');
                     
                     // 🔥 同步配置到UI控件
                     document.getElementById('positiveRatioStoplossSwitch').checked = enabled;
                     document.getElementById('positiveRatioThresholdSlider').value = threshold;
                     document.getElementById('positiveRatioThresholdDisplay').textContent = threshold.toFixed(1);
+                    
+                    console.log('✅ [正数占比] UI已同步 - 开关:', enabled, '阈值:', threshold);
                     
                     // 判断当前状态
                     let currentStatus = currentRatio >= threshold ? 'above' : 'below';
@@ -15435,9 +15438,11 @@ ${data.sMsg || result.message || ''}`);
                 const data = await response.json();
                 
                 if (data.success) {
-                    console.log('✅ [正数占比] 配置保存成功');
+                    console.log('✅ [正数占比] 配置保存成功，后端返回:', data.config);
                     showNotification(`✅ 正数占比止盈止损已${enabled ? '启用' : '关闭'}`, 'success');
+                    console.log('🔄 [正数占比] 即将刷新状态面板...');
                     await refreshPositiveRatioStatus();
+                    console.log('✅ [正数占比] 状态面板刷新完成');
                 } else {
                     console.error('❌ [正数占比] 配置保存失败:', data.message);
                     showNotification('❌ 配置保存失败', 'error');
@@ -15939,7 +15944,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.9-POSITIVE-RATIO-SYNC-20260307-15:30 | 缓存戳: 20260307153000');
+        console.log('🚀 页面版本: v3.2.0-POSITIVE-RATIO-DEBUG-20260307-15:45 | 缓存戳: 20260307154500');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
