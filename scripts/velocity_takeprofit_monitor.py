@@ -4,6 +4,7 @@
 每30秒检查一次5分钟涨速，触发条件时执行平仓
 """
 import sys
+import os
 import time
 import json
 import requests
@@ -21,13 +22,49 @@ ACCOUNTS = [
     'account_poit'
 ]
 
+# 账户中文名称映射
+ACCOUNT_NAMES = {
+    'account_main': '主账户',
+    'account_fangfang12': 'Fangfang12',
+    'account_anchor': '锚点账号',
+    'account_poit': 'POIT'
+}
+
 CHECK_INTERVAL = 30  # 检查间隔（秒）
 API_BASE_URL = 'http://localhost:9002'
+
+# Telegram配置（从环境变量读取）
+TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
+TG_CHAT_ID = os.getenv('TG_CHAT_ID')
 
 def log(msg):
     """打印日志"""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f"[{timestamp}] {msg}", flush=True)
+
+def send_telegram(message):
+    """发送Telegram消息"""
+    if not TG_BOT_TOKEN or not TG_CHAT_ID:
+        log("⚠️ Telegram配置未设置，跳过发送")
+        return False
+    
+    try:
+        url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
+        data = {
+            'chat_id': TG_CHAT_ID,
+            'text': message,
+            'parse_mode': 'HTML'
+        }
+        
+        response = requests.post(url, data=data, timeout=10)
+        response.raise_for_status()
+        
+        log("✅ Telegram消息发送成功")
+        return True
+        
+    except Exception as e:
+        log(f"❌ Telegram消息发送失败: {e}")
+        return False
 
 def get_velocity_config(account_id):
     """获取账户的涨速止盈配置"""
@@ -165,25 +202,67 @@ def check_account(account_id):
     
     # 检查做多止盈
     if long_enabled and long_permission and current_velocity >= max_threshold:
+        account_name = ACCOUNT_NAMES.get(account_id, account_id)
         log(f"🎯 [{account_id}] 触发做多止盈: {current_velocity:.2f}% >= {max_threshold:.1f}%")
         positions = get_positions(account_id)
         long_positions = [p for p in positions if p.get('posSide') == 'long']
         
         if long_positions:
             log(f"📈 [{account_id}] 发现 {len(long_positions)} 个多单持仓，准备平仓")
-            close_positions(account_id, positions, 'long')
+            success = close_positions(account_id, positions, 'long')
+            
+            # 发送TG通知
+            if success:
+                position_details = "\n".join([
+                    f"  • {p.get('instId')}: {abs(float(p.get('pos', 0)))}张"
+                    for p in long_positions
+                ])
+                message = f"""🎯 <b>5分钟涨速止盈 - 做多平仓</b>
+
+📋 <b>账户</b>: {account_name} ({account_id})
+📊 <b>当前涨速</b>: +{current_velocity:.2f}%
+⚠️ <b>触发阈值</b>: +{max_threshold:.1f}%
+📈 <b>平仓数量</b>: {len(long_positions)}个多单
+
+<b>平仓明细</b>:
+{position_details}
+
+⏰ <b>执行时间</b>: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+✅ <b>状态</b>: 平仓成功"""
+                send_telegram(message)
         else:
             log(f"⚠️ [{account_id}] 没有多单持仓，跳过")
     
     # 检查做空止盈
     if short_enabled and short_permission and current_velocity <= min_threshold:
+        account_name = ACCOUNT_NAMES.get(account_id, account_id)
         log(f"🎯 [{account_id}] 触发做空止盈: {current_velocity:.2f}% <= {min_threshold:.1f}%")
         positions = get_positions(account_id)
         short_positions = [p for p in positions if p.get('posSide') == 'short']
         
         if short_positions:
             log(f"📉 [{account_id}] 发现 {len(short_positions)} 个空单持仓，准备平仓")
-            close_positions(account_id, positions, 'short')
+            success = close_positions(account_id, positions, 'short')
+            
+            # 发送TG通知
+            if success:
+                position_details = "\n".join([
+                    f"  • {p.get('instId')}: {abs(float(p.get('pos', 0)))}张"
+                    for p in short_positions
+                ])
+                message = f"""🎯 <b>5分钟涨速止盈 - 做空平仓</b>
+
+📋 <b>账户</b>: {account_name} ({account_id})
+📊 <b>当前涨速</b>: {current_velocity:.2f}%
+⚠️ <b>触发阈值</b>: {min_threshold:.1f}%
+📉 <b>平仓数量</b>: {len(short_positions)}个空单
+
+<b>平仓明细</b>:
+{position_details}
+
+⏰ <b>执行时间</b>: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+✅ <b>状态</b>: 平仓成功"""
+                send_telegram(message)
         else:
             log(f"⚠️ [{account_id}] 没有空单持仓，跳过")
 

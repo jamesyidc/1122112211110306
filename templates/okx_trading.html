@@ -8627,7 +8627,9 @@ data/
             }
             
             // 显示结果并发送Telegram通知
+            const accountName = account.name || currentAccount;
             const resultMsg = `${emoji} 批量开仓完成\n\n` +
+                `【交易账户】${accountName}\n\n` +
                 `【结果统计】\n` +
                 `  • 成功: ${successCount} 个\n` +
                 `  • 失败: ${failCount} 个\n\n` +
@@ -8834,7 +8836,9 @@ data/
             }
             
             // 显示结果并发送Telegram通知
+            const accountName = account.name || currentAccount;
             const resultMsg = `${emoji} 批量开仓完成\n\n` +
+                `【交易账户】${accountName}\n\n` +
                 `成功: ${successCount}/${top8Symbols.length}\n` +
                 `失败: ${failCount}/${top8Symbols.length}\n\n` +
                 `详细结果:\n${results.join('\n')}`;
@@ -9060,7 +9064,9 @@ data/
             }
             
             // 显示结果并发送Telegram通知
+            const accountName = account.name || currentAccount;
             const resultMsg = `${emoji} 批量开仓完成\n\n` +
+                `【交易账户】${accountName}\n\n` +
                 `成功: ${successCount}/${bottom8Symbols.length}\n` +
                 `失败: ${failCount}/${bottom8Symbols.length}\n\n` +
                 `详细结果:\n${results.join('\n')}`;
