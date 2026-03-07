@@ -15337,7 +15337,7 @@ ${data.sMsg || result.message || ''}`);
                 const configData = await configResponse.json();
                 
                 if (ratioData.success && configData.success) {
-                    const currentRatio = ratioData.positive_ratio || 0;
+                    const currentRatio = ratioData.stats.positive_ratio || 0;
                     const config = configData.config;
                     const threshold = config.threshold || 40;
                     const enabled = config.enabled || false;
@@ -15824,7 +15824,7 @@ ${data.sMsg || result.message || ''}`);
     
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v3.1.0-VELOCITY-TAKEPROFIT-20260307-13:30 | 缓存戳: 20260307133000');
+        console.log('🚀 页面版本: v3.1.1-POSITIVE-RATIO-FIX-20260307-13:50 | 缓存戳: 20260307135000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         
