@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>验证window.positiveRatioStats</title>
+</head>
+<body>
+    <h1>正数占比数据验证</h1>
+    <div id="status"></div>
+    <button onclick="checkData()">检查数据</button>
+    <pre id="result"></pre>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        const resultPre = document.getElementById('result');
+        
+        // 1. 首先模拟API获取数据
+        async function loadData() {
+            statusDiv.textContent = '正在加载数据...';
+            
+            try {
+                const response = await fetch('/api/coin-change-tracker/positive-ratio-stats?_t=' + Date.now());
+                const data = await response.json();
+                
+                if (data.success && data.stats) {
+                    window.positiveRatioStats = data.stats;
+                    statusDiv.textContent = '✅ 数据加载成功';
+                    resultPre.textContent = JSON.stringify(window.positiveRatioStats, null, 2);
+                    
+                    console.log('✅ window.positiveRatioStats 已设置:', window.positiveRatioStats);
+                    console.log('typeof window.positiveRatioStats:', typeof window.positiveRatioStats);
+                    console.log('positive_ratio:', window.positiveRatioStats.positive_ratio);
+                    console.log('positive_ratio !== undefined:', window.positiveRatioStats.positive_ratio !== undefined);
+                } else {
+                    statusDiv.textContent = '❌ 数据加载失败';
+                }
+            } catch (error) {
+                statusDiv.textContent = '❌ 错误: ' + error.message;
+            }
+        }
+        
+        function checkData() {
+            console.log('\n🔍 检查 window.positiveRatioStats:');
+            console.log('  存在:', window.positiveRatioStats !== undefined);
+            
+            if (window.positiveRatioStats) {
+                console.log('  数据:', window.positiveRatioStats);
+                console.log('  positive_ratio:', window.positiveRatioStats.positive_ratio);
+                console.log('  类型:', typeof window.positiveRatioStats.positive_ratio);
+                console.log('  !== undefined:', window.positiveRatioStats.positive_ratio !== undefined);
+                console.log('  === 0:', window.positiveRatioStats.positive_ratio === 0);
+                console.log('  === 0.0:', window.positiveRatioStats.positive_ratio === 0.0);
+                
+                // 测试tooltip条件
+                if (window.positiveRatioStats.positive_ratio !== undefined) {
+                    console.log('  ✅ 条件通过！应该显示正数占比');
+                } else {
+                    console.log('  ❌ 条件不通过');
+                }
+                
+                resultPre.textContent = JSON.stringify(window.positiveRatioStats, null, 2);
+            } else {
+                console.log('  ❌ window.positiveRatioStats 不存在');
+                resultPre.textContent = 'window.positiveRatioStats 不存在';
+            }
+        }
+        
+        // 页面加载时自动获取数据
+        loadData();
+    </script>
+</body>
+</html>

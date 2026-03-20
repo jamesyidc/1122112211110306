@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>正数占比测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <h1 class="text-3xl mb-6">正数占比功能测试</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- 正数占比卡片 -->
+        <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purple-500">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-gray-600 font-medium">正数占比</span>
+                <i class="fas fa-percentage text-purple-600"></i>
+            </div>
+            <div id="positiveRatio" class="text-3xl font-bold text-purple-600">--</div>
+            <div class="text-sm text-gray-500 mt-2">
+                <div class="flex items-center justify-between">
+                    <span id="positiveRatioStatus" class="font-medium">--</span>
+                    <span id="positiveRatioDuration" class="text-xs">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- API响应 -->
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-xl mb-4">API响应</h3>
+            <pre id="apiResponse" class="text-sm bg-gray-900 p-4 rounded overflow-auto max-h-64">加载中...</pre>
+        </div>
+    </div>
+    
+    <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl mb-4">控制台日志</h3>
+        <div id="console" class="text-sm bg-gray-900 p-4 rounded overflow-auto max-h-96 font-mono"></div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        const consoleDiv = document.getElementById('console');
+        const log = (msg, color = 'white') => {
+            const p = document.createElement('p');
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            p.style.color = color;
+            consoleDiv.appendChild(p);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        };
+        
+        async function testPositiveRatio() {
+            try {
+                log('🔄 开始测试正数占比API...', 'cyan');
+                
+                const url = `/api/coin-change-tracker/positive-ratio-stats?_t=${Date.now()}`;
+                log(`📡 请求URL: ${url}`, 'yellow');
+                
+                const response = await fetch(url);
+                log(`📊 响应状态: ${response.status} ${response.statusText}`, response.ok ? 'green' : 'red');
+                
+                const result = await response.json();
+                document.getElementById('apiResponse').textContent = JSON.stringify(result, null, 2);
+                log('✅ API响应解析成功', 'green');
+                
+                if (result.success && result.stats) {
+                    const stats = result.stats;
+                    log(`📊 数据: ${JSON.stringify(stats)}`, 'white');
+                    
+                    // 更新卡片
+                    const ratio = stats.positive_ratio;
+                    const ratioEl = document.getElementById('positiveRatio');
+                    ratioEl.textContent = `${ratio.toFixed(1)}%`;
+                    log(`✅ 正数占比: ${ratio.toFixed(1)}%`, 'green');
+                    
+                    // 设置颜色
+                    let colorClass = 'text-purple-600';
+                    let statusText = '震荡';
+                    if (ratio > 60) {
+                        colorClass = 'text-green-600';
+                        statusText = '强势上涨';
+                    } else if (ratio > 50) {
+                        colorClass = 'text-blue-600';
+                        statusText = '偏多';
+                    } else if (ratio > 40) {
+                        colorClass = 'text-orange-600';
+                        statusText = '偏空';
+                    } else {
+                        colorClass = 'text-red-600';
+                        statusText = '大幅下跌';
+                    }
+                    ratioEl.className = `text-3xl font-bold ${colorClass}`;
+                    log(`✅ 状态: ${statusText} (颜色: ${colorClass})`, 'green');
+                    
+                    // 更新状态
+                    const statusEl = document.getElementById('positiveRatioStatus');
+                    statusEl.textContent = statusText;
+                    
+                    // 更新时长
+                    const duration = stats.positive_duration;
+                    const durationText = duration >= 60 
+                        ? `${(duration / 60).toFixed(1)}小时` 
+                        : `${duration.toFixed(0)}分钟`;
+                    const durationEl = document.getElementById('positiveRatioDuration');
+                    durationEl.textContent = `${stats.positive_count}/${stats.total_count} (${durationText})`;
+                    log(`✅ 时长: ${stats.positive_count}/${stats.total_count} (${durationText})`, 'green');
+                    
+                    log('🎉 正数占比卡片渲染完成！', 'lime');
+                } else {
+                    log('⚠️ API响应成功但无数据', 'orange');
+                }
+            } catch (error) {
+                log(`❌ 错误: ${error.message}`, 'red');
+                console.error(error);
+            }
+        }
+        
+        // 页面加载后测试
+        window.addEventListener('DOMContentLoaded', () => {
+            log('🚀 页面加载完成，开始测试...', 'lime');
+            testPositiveRatio();
+        });
+    </script>
+</body>
+</html>

@@ -21,14 +21,14 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 
-# 27个追踪的币种
+# 27个追踪的币种（2026-03-06更新）
 SYMBOLS = [
-    'BTC', 'ETH', 'BNB', 'XRP', 'DOGE', 
-    'SOL', 'DOT', 'MATIC', 'LTC', 'LINK',
-    'HBAR', 'TAO', 'CFX', 'TRX', 'TON',
-    'NEAR', 'LDO', 'CRO', 'ETC', 'XLM',
-    'BCH', 'UNI', 'SUI', 'FIL', 'STX',
-    'CRV', 'AAVE', 'APT'
+    'BTC', 'ETH', 'XRP', 'BNB', 'SOL',
+    'LTC', 'DOGE', 'SUI', 'TRX', 'TON',
+    'ETC', 'BCH', 'HBAR', 'XLM', 'FIL',
+    'LINK', 'CRO', 'DOT', 'AAVE', 'UNI',
+    'NEAR', 'APT', 'CFX', 'CRV', 'STX',
+    'LDO', 'TAO'
 ]
 
 
@@ -420,8 +420,29 @@ def main():
                         total_rsi = None
             
             if current_prices:
+                # 🔴 强制检查：必须获取到全部27个币种的价格
+                if len(current_prices) < 27:
+                    missing_symbols = [s for s in SYMBOLS if s not in current_prices]
+                    print(f"❌ [数据不完整] 只获取到 {len(current_prices)}/27 个币种，缺失: {', '.join(missing_symbols)}")
+                    print(f"⚠️  [跳过保存] 数据不完整，跳过本次采集，等待下次重试...")
+                    print(f"[等待] 下次采集时间: {(now + timedelta(minutes=1)).strftime('%H:%M:%S')}")
+                    time.sleep(60)
+                    continue
+                
                 # 计算涨跌幅
                 changes = calculate_changes(current_prices, baseline_prices)
+                
+                # 再次检查：确保所有27个币种都有涨跌幅数据
+                if len(changes) < 27:
+                    missing_in_changes = [s for s in SYMBOLS if s not in changes]
+                    print(f"❌ [数据不完整] 涨跌幅计算后只有 {len(changes)}/27 个币种，缺失: {', '.join(missing_in_changes)}")
+                    print(f"⚠️  [跳过保存] 数据不完整，跳过本次采集，等待下次重试...")
+                    print(f"[等待] 下次采集时间: {(now + timedelta(minutes=1)).strftime('%H:%M:%S')}")
+                    time.sleep(60)
+                    continue
+                
+                # ✅ 数据完整，可以保存
+                print(f"✅ [数据完整] 成功获取全部 27/27 个币种的数据")
                 
                 # 计算总和
                 total_change = sum(item['change_pct'] for item in changes.values())

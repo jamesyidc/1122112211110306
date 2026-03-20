@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tooltip测试</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; background: #f0f0f0; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>正数占比Tooltip渲染测试</h1>
+    
+    <div class="section">
+        <h3>1. 检查window.positiveRatioStats</h3>
+        <div id="statsCheck"></div>
+    </div>
+    
+    <div class="section">
+        <h3>2. 模拟Tooltip formatter</h3>
+        <div id="tooltipPreview" style="padding: 10px; background: white; border: 1px solid #ccc;"></div>
+    </div>
+    
+    <script>
+        // 检查1: window.positiveRatioStats
+        fetch('/api/coin-change-tracker/positive-ratio-stats')
+            .then(r => r.json())
+            .then(result => {
+                if (result.success && result.stats) {
+                    window.positiveRatioStats = result.stats;
+                    
+                    document.getElementById('statsCheck').innerHTML = `
+                        <span class="pass">✓ PASS</span><br>
+                        window.positiveRatioStats = ${JSON.stringify(window.positiveRatioStats, null, 2)}
+                    `;
+                    
+                    // 模拟tooltip显示
+                    renderTooltip();
+                } else {
+                    document.getElementById('statsCheck').innerHTML = `
+                        <span class="fail">✗ FAIL</span><br>
+                        API返回失败: ${JSON.stringify(result)}
+                    `;
+                }
+            });
+        
+        function renderTooltip() {
+            let html = `<div style="padding: 8px; min-width: 240px;">`;
+            html += `<div style="font-weight: bold; margin-bottom: 8px;">时间: 01:18:25</div>`;
+            html += `<div style="margin-bottom: 4px;">27币涨跌幅之和</div>`;
+            html += `<div style="font-size: 16px; font-weight: bold; color: #EF4444;">-5.48%</div>`;
+            html += `<div style="margin-top: 4px; font-size: 13px; color: #6B7280;">上涨占比: 3.7%</div>`;
+            
+            // 正数占比部分
+            if (window.positiveRatioStats && window.positiveRatioStats.positive_ratio !== undefined) {
+                const positiveRatio = window.positiveRatioStats.positive_ratio;
+                const positiveCount = window.positiveRatioStats.positive_count;
+                const totalCount = window.positiveRatioStats.total_count;
+                
+                html += `<div style="margin-top: 6px; padding: 6px; background: #F3F4F6; border-radius: 4px;">`;
+                html += `<div style="font-size: 12px; color: #6B7280; margin-bottom: 2px;">`;
+                html += `<i class="fas fa-chart-line"></i> 今日正数时段占比`;
+                html += `</div>`;
+                html += `<div style="font-size: 14px; font-weight: bold; color: ${positiveRatio > 50 ? '#10B981' : '#EF4444'};">`;
+                html += `${positiveRatio.toFixed(1)}%`;
+                html += `</div>`;
+                html += `<div style="font-size: 11px; color: #9CA3AF; margin-top: 2px;">`;
+                html += `${positiveCount}/${totalCount} 数据点`;
+                html += `</div>`;
+                html += `</div>`;
+                
+                document.getElementById('tooltipPreview').innerHTML = html + `</div>`;
+            } else {
+                html += `<div style="margin-top: 6px; padding: 6px; background: #fee; border-radius: 4px; color: red;">`;
+                html += `❌ window.positiveRatioStats 未定义`;
+                html += `</div>`;
+                document.getElementById('tooltipPreview').innerHTML = html + `</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

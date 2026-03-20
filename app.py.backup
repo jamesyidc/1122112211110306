@@ -10503,7 +10503,7 @@ def telegram_send_message():
             'traceback': traceback.format_exc()
         })
 
-def send_trading_telegram_notification(action_type, details, account_id=None):
+def send_trading_telegram_notification(action_type, details):
     """
     发送交易相关的Telegram通知
     
@@ -10513,7 +10513,6 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             - instId: 交易对
             - side: buy/sell
             - posSide: long/short
-        account_id: 账户ID (可选)
             - size: 数量
             - price: 价格
             - usdt: USDT金额
@@ -10554,17 +10553,6 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
         leverage = details.get('leverage', 1)
         
         # 根据操作类型生成不同的消息
-        # 账户名称映射
-        account_names = {
-            'account_main': '主账户',
-            'account_fangfang12': 'Fangfang12',
-            'account_anchor': '锚点账号',
-            'account_poit': 'POIT',
-            'account_poit_main': 'POIT主账户',
-            'account_dadanini': 'Dadanini'
-        }
-        account_name = account_names.get(account_id, account_id) if account_id else '未知账户'
-        
         if action_type == 'open_position':
             emoji = "🚀" if pos_side == 'long' else "🔻"
             action_text = "开多仓" if pos_side == 'long' else "开空仓"
@@ -10572,7 +10560,6 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             message = f"""
 {emoji} <b>OKX开仓通知</b>
 
-📋 <b>交易账户:</b> {account_name}
 📊 <b>交易对:</b> {inst_id}
 📈 <b>方向:</b> {action_text}
 💰 <b>金额:</b> {usdt:.2f} USDT
@@ -10597,7 +10584,6 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             message = f"""
 {emoji} <b>OKX止盈触发</b>
 
-📋 <b>交易账户:</b> {account_name}
 📊 <b>交易对:</b> {inst_id}
 💰 <b>盈亏:</b> {pnl:.2f} USDT ({pnl_percent:+.2f}%)
 💵 <b>平仓价:</b> {price:.4f}
@@ -10612,7 +10598,6 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             message = f"""
 {emoji} <b>OKX止损触发</b>
 
-📋 <b>交易账户:</b> {account_name}
 📊 <b>交易对:</b> {inst_id}
 💰 <b>盈亏:</b> {pnl:.2f} USDT ({pnl_percent:+.2f}%)
 💵 <b>平仓价:</b> {price:.4f}
@@ -10628,7 +10613,6 @@ def send_trading_telegram_notification(action_type, details, account_id=None):
             message = f"""
 {emoji} <b>OKX手动平仓</b>
 
-📋 <b>交易账户:</b> {account_name}
 📊 <b>交易对:</b> {inst_id}
 💰 <b>盈亏:</b> {pnl:.2f} USDT ({pnl_percent:+.2f}%)
 📍 <b>平仓价:</b> {avg_price:.4f}
@@ -15235,9 +15219,7 @@ def okx_trading():
     """OKX实盘交易系统"""
     # 添加时间戳参数强制刷新
     version = str(int(time.time()))
-    # 🔥 添加account对象
-    account = {'id': 'main', 'name': 'Main Account'}
-    response = make_response(render_template('okx_trading.html', cache_buster=version, account=account))
+    response = make_response(render_template('okx_trading.html', cache_buster=version))
     # 禁用所有缓存
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
     response.headers['Pragma'] = 'no-cache'
@@ -16259,7 +16241,6 @@ def place_okx_order():
                 passphrase = passphrase or config['passphrase']
 
         passphrase = data.get('passphrase', '')
-        account_id = data.get('accountId', None)  # 账户ID(用于TG通知显示)
         
         # 订单参数
         inst_id = data.get('instId', '')  # 交易对,如 BTC-USDT-SWAP
@@ -16704,7 +16685,7 @@ def place_okx_order():
                         'leverage': leverage_value,
                         'tpPrice': tpsl_result.get('tpPrice') if tpsl_result else None,
                         'slPrice': tpsl_result.get('slPrice') if tpsl_result else None
-                    }, account_id)
+                    })
                 except Exception as e:
                     print(f"[TG通知] 开仓通知发送失败: {str(e)}")
                 
@@ -20542,10 +20523,6 @@ def close_okx_position():
         inst_id = data.get('instId', '')
         pos_side = data.get('posSide', '')  # long/short/net
         close_size = data.get('closeSize', None)  # 平仓数量(张数),None=全部平仓
-        account_id = data.get('accountId', None)  # 🔧 提取账户ID
-        
-        # 🔍 调试日志
-        print(f"[close_okx_position] 收到平仓请求: instId={inst_id}, posSide={pos_side}, accountId={account_id}")
         
         if not api_key or not secret_key or not passphrase:
             return jsonify({
@@ -20797,7 +20774,7 @@ def close_okx_position():
                     'avgPrice': avg_price,
                     'pnl': pnl,
                     'pnlPercent': pnl_percent
-                }, account_id=account_id)
+                })
                 
                 # 📊 记录盈亏到统计文件
                 try:
@@ -25112,11 +25089,10 @@ def get_positive_ratio_stats():
                 'error': '数据目录不存在'
             })
         
-        # 如果没有指定日期,使用北京时间的当天日期
+        # 如果没有指定日期,使用今天
         if not date_str:
             beijing_time = datetime.now(timezone(timedelta(hours=8)))
             file_date_str = beijing_time.strftime('%Y%m%d')
-            print(f"[正数占比API] 使用北京时间当天数据: {file_date_str}")
         else:
             # 支持两种格式:YYYY-MM-DD 或 YYYYMMDD
             if '-' in date_str:
@@ -31234,6 +31210,9 @@ def test_prediction_display():
     return render_template('test_prediction_display.html')
 
 
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=9002, debug=False)
+
 # 测试页面：对冲底仓开关测试
 @app.route('/test-midnight-hedge')
 def test_midnight_hedge():
@@ -31540,25 +31519,6 @@ def velocity_takeprofit_config(account_id):
                 'last_check_time': None
             }
         
-        # 🔥 从coin-change-tracker获取当前5分钟涨速
-        try:
-            import requests
-            response = requests.get('http://localhost:9002/api/coin-change-tracker/velocity-history?limit=1', timeout=2)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('success') and data.get('data') and len(data['data']) > 0:
-                    latest = data['data'][0]
-                    current_velocity = float(latest.get('velocity_5min', 0))
-                    config['current_velocity'] = round(current_velocity, 2)
-                else:
-                    config['current_velocity'] = 0.0
-            else:
-                config['current_velocity'] = 0.0
-        except Exception as e:
-            print(f"❌ 获取5分钟涨速失败: {e}")
-            config['current_velocity'] = 0.0
-        
         return jsonify({
             'success': True,
             'config': config
@@ -31830,8 +31790,4 @@ def velocity_takeprofit_history(account_id):
         'success': True,
         'history': history
     })
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9002, debug=False)
 

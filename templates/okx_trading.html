@@ -1974,105 +1974,7 @@
             </div>
         </div>
 
-        <!-- 🔥 止盈止损后台自动执行说明 (2026-02-28) -->
-        <div style="margin: 10px 0; padding: 15px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 8px; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);">
-            <h4 style="margin: 0 0 10px 0; color: #065f46; font-size: 14px; font-weight: 800;">
-                ✅ 止盈止损后台自动执行 - 无需浏览器打开 (v3.0 - 2026-02-28)
-            </h4>
-            <div style="font-size: 11px; line-height: 1.8; color: #064e3b;">
-                <p style="margin: 0 0 8px 0;"><strong>【问题】</strong>止盈止损需要浏览器保持打开，关闭后无法执行</p>
-                
-                <p style="margin: 0 0 8px 0;"><strong>【修复】</strong>后台自动监控服务 - 7×24小时运行</p>
-                <div style="background: white; padding: 10px; border-radius: 6px; margin: 8px 0;">
-                    <p style="margin: 0 0 6px 0; font-weight: 700; color: #10b981;">🟢 后台监控进程：okx-tpsl-monitor</p>
-                    <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px;">
-                        <li>✅ PM2守护进程管理，崩溃自动重启</li>
-                        <li>✅ 每60秒自动检查所有账户的持仓盈亏</li>
-                        <li>✅ 触发止盈/止损条件时立即执行平仓</li>
-                        <li>✅ 完全不依赖浏览器，关闭浏览器也能执行</li>
-                        <li>✅ 支持普通止盈止损 + 市场情绪紧急止盈</li>
-                    </ul>
-                </div>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">📊 监控账户（5个）：</p>
-                <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px;">
-                    <li>account_main（主账户）</li>
-                    <li>account_fangfang12</li>
-                    <li>account_poit_main（POIT子账户）</li>
-                    <li>account_anchor（锚点账户）</li>
-                    <li>account_dadanini（新增）</li>
-                </ul>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">🎯 工作流程：</p>
-                <div style="background: #f0fdf4; padding: 8px; border-radius: 4px; margin: 6px 0; border-left: 3px solid #10b981;">
-                    <ol style="margin: 0; padding-left: 20px; font-size: 10px;">
-                        <li>每60秒扫描所有账户</li>
-                        <li>读取止盈止损配置（data/okx_tpsl_settings/）</li>
-                        <li>获取当前持仓并计算盈亏百分比</li>
-                        <li>检查是否触发：
-                            <ul style="margin: 4px 0 0 15px;">
-                                <li>市场情绪止盈（优先）：检测到极端信号立即平仓</li>
-                                <li>普通止盈：盈亏% ≥ 止盈阈值</li>
-                                <li>普通止损：盈亏% ≤ 止损阈值</li>
-                            </ul>
-                        </li>
-                        <li>执行平仓（调用OKX API设置条件单）</li>
-                        <li>记录执行结果（防止重复执行）</li>
-                        <li>发送Telegram通知</li>
-                    </ol>
-                </div>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">🔒 安全机制：</p>
-                <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px;">
-                    <li>✅ 防重复执行：每个持仓的止盈/止损只执行一次</li>
-                    <li>✅ 执行记录：保存到 {account_id}_tpsl_execution.jsonl</li>
-                    <li>✅ 自动重启：PM2确保进程崩溃后自动恢复</li>
-                    <li>✅ 日志记录：详细记录每次检查和执行过程</li>
-                    <li>✅ 实时通知：Telegram推送执行结果</li>
-                </ul>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">📋 配置文件：</p>
-                <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px;">
-                    <li>止盈止损设置：<code>data/okx_tpsl_settings/{account_id}_tpsl.jsonl</code></li>
-                    <li>账户API凭证：<code>data/okx_auto_strategy/{account_id}.json</code></li>
-                    <li>执行记录：<code>data/okx_tpsl_settings/{account_id}_tpsl_execution.jsonl</code></li>
-                </ul>
-                
-                <p style="margin: 8px 0 6px 0; font-weight: 700; color: #065f46;">🔍 查看运行状态：</p>
-                <div style="background: #1f2937; color: #10b981; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 10px; margin: 6px 0;">
-                    # 查看监控进程<br>
-                    pm2 list | grep okx-tpsl-monitor<br>
-                    <br>
-                    # 查看实时日志<br>
-                    pm2 logs okx-tpsl-monitor --lines 50<br>
-                    <br>
-                    # 日志示例：<br>
-                    [account_main] 📊 DOT-USDT-SWAP long: 盈亏=0.41%<br>
-                    [account_main] 📊 UNI-USDT-SWAP long: 盈亏=-0.75%<br>
-                    [account_main] 🎯 触发止盈: 12.5% >= 12.0%<br>
-                    [account_main] ✅ 止盈设置成功<br>
-                    等待 60 秒后继续...
-                </div>
-                
-                <p style="margin: 10px 0 0 0; padding: 10px; background: #fef3c7; border-radius: 6px; border-left: 3px solid #f59e0b; font-size: 10px;">
-                    <strong>💡 重要提示：</strong><br>
-                    1. 监控进程已经在后台运行，无需手动启动<br>
-                    2. 浏览器中的止盈止损开关只控制前端页面的弹窗提示<br>
-                    3. 后台监控服务读取JSONL配置文件，不受前端开关影响<br>
-                    4. 修改止盈止损阈值后，后台会在下次检查时自动读取新配置<br>
-                    5. 如需临时禁用监控，修改JSONL文件中的 <code>enabled</code> 字段为 <code>false</code>
-                </p>
-                
-                <p style="margin: 10px 0 0 0; padding: 10px; background: #fee2e2; border-radius: 6px; border-left: 3px solid #dc2626; font-size: 10px;">
-                    <strong>⚠️ 注意事项：</strong><br>
-                    1. 确保账户API凭证配置正确（apiKey、apiSecret、passphrase）<br>
-                    2. 确保账户有足够的持仓才会触发止盈止损<br>
-                    3. 监控进程每60秒检查一次，不是实时的（已够快）<br>
-                    4. 市场剧烈波动时可能存在滑点，建议设置合理的止盈止损阈值<br>
-                    5. 详细文档：<code>FIX_BACKEND_AUTOMATION_2026-02-28.md</code>
-                </p>
-            </div>
-        </div>
+
 
         <!-- 系统架构说明（可伸缩） -->
         <div style="margin-top: 10px; padding: 10px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px; border: 2px solid #0ea5e9;">
@@ -2081,6 +1983,347 @@
                 <span id="archToggleIcon" style="color: #0369a1; font-weight: bold; font-size: 14px;">▼</span>
             </div>
             <div id="systemArchitecture" style="margin-top: 12px; max-height: 500px; overflow-y: auto; color: #0c4a6e; font-size: 11px; line-height: 1.8;">
+                
+                <!-- 🔥🔥🔥 v3.16.1 完整系统备份与部署方案 (2026-03-08) 🔥🔥🔥 -->
+                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 14px; border-radius: 8px; margin-bottom: 14px; border: 3px solid #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                    <h4 style="margin: 0 0 10px 0; color: #92400e; font-size: 14px; font-weight: 900;">🎉 v3.16.1 - 完整系统备份与部署解决方案（2026-03-08）</h4>
+                    
+                    <!-- 备份概览 -->
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #f59e0b;">
+                        <p style="margin: 0 0 8px 0; font-weight: 800; color: #92400e;">📦 备份文件信息</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #78350f; font-size: 10px;">
+                            <li><strong>备份文件：</strong>/tmp/okx_trading_backup_20260307.tar.gz</li>
+                            <li><strong>文件大小：</strong>260 MB（压缩后）→ 3.3 GB（解压后）</li>
+                            <li><strong>压缩率：</strong>92% | <strong>备份时间：</strong>65秒</li>
+                            <li><strong>数据完整性：</strong>✅ 完整数据（非7天数据）</li>
+                            <li><strong>备份脚本：</strong>create_full_backup.sh（可重复执行）</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 备份内容 -->
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <p style="margin: 0 0 8px 0; font-weight: 800; color: #92400e;">📂 备份内容清单</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10px;">
+                            <div style="background: #fef3c7; padding: 8px; border-radius: 4px;">
+                                <p style="margin: 0 0 4px 0; font-weight: 700; color: #78350f;">✅ 核心代码</p>
+                                <ul style="margin: 0; padding-left: 16px; color: #78350f;">
+                                    <li>app.py (5MB) - Flask主应用</li>
+                                    <li>source_code/ (752KB) - 30+模块</li>
+                                    <li>panic_paged_v2/ - V2系统</li>
+                                    <li>panic_v3/ - V3系统</li>
+                                    <li>scripts/ (340KB) - 监控脚本</li>
+                                </ul>
+                            </div>
+                            <div style="background: #fef3c7; padding: 8px; border-radius: 4px;">
+                                <p style="margin: 0 0 4px 0; font-weight: 700; color: #78350f;">✅ 前端代码</p>
+                                <ul style="margin: 0; padding-left: 16px; color: #78350f;">
+                                    <li>templates/ (7.9MB) - 88文件</li>
+                                    <li>static/ - CSS/JS/图片</li>
+                                </ul>
+                                <p style="margin: 8px 0 4px 0; font-weight: 700; color: #78350f;">✅ 配置文件</p>
+                                <ul style="margin: 0; padding-left: 16px; color: #78350f;">
+                                    <li>config/ (164KB)</li>
+                                    <li>requirements.txt</li>
+                                    <li>ecosystem.config.js</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="background: #fed7aa; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                            <p style="margin: 0 0 4px 0; font-weight: 700; color: #78350f;">✅ 数据文件（3.1 GB 完整数据）</p>
+                            <ul style="margin: 0; padding-left: 16px; font-size: 9px; color: #78350f;">
+                                <li>coin_change_tracker/ - 币种变化追踪数据（完整历史JSONL）</li>
+                                <li>positive_ratio_stoploss/ - 5个账户独立配置+历史</li>
+                                <li>okx_auto_strategy/ - 6个账户配置</li>
+                                <li>其他所有数据目录...</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 系统依赖 -->
+                    <div style="background: #fffbeb; padding: 10px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #d97706;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #92400e;">🔧 系统依赖（已导出）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #78350f;">
+                            <li><strong>Python包：</strong>Flask, requests, pandas, python-okx 等（python_packages.txt）</li>
+                            <li><strong>Node.js：</strong>PM2全局安装</li>
+                            <li><strong>系统包：</strong>build-essential, python3-dev, git 等（apt_packages.txt）</li>
+                            <li><strong>PM2进程：</strong>4个守护进程配置（dump.pm2）</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 快速部署 -->
+                    <div style="background: #1f2937; color: #fbbf24; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 9px; margin-bottom: 10px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700;">🚀 快速部署（7步）</p>
+                        # 1. 解压备份<br>
+                        tar xzf okx_trading_backup_20260307.tar.gz<br>
+                        <br>
+                        # 2. 复制到目标<br>
+                        cp -r okx_trading_backup_20260307/webapp/* /home/user/webapp/<br>
+                        <br>
+                        # 3. 安装Python依赖<br>
+                        pip install -r requirements.txt<br>
+                        <br>
+                        # 4. 安装PM2<br>
+                        npm install -g pm2<br>
+                        <br>
+                        # 5. 启动服务<br>
+                        pm2 start app.py --name flask-app --interpreter python3<br>
+                        pm2 start scripts/coin_change_tracker.py --name coin-change-tracker<br>
+                        pm2 start scripts/positive_ratio_monitor.py --name positive-ratio-monitor<br>
+                        pm2 start scripts/positive_ratio_auto_close.py --name positive-ratio-auto-close<br>
+                        <br>
+                        # 6. 保存配置<br>
+                        pm2 save && pm2 startup<br>
+                        <br>
+                        # 7. 验证<br>
+                        pm2 list && curl http://localhost:9002/
+                    </div>
+                    
+                    <!-- 相关文档 -->
+                    <div style="background: white; padding: 10px; border-radius: 6px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #92400e;">📚 相关文档</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #78350f;">
+                            <li><strong>DEPLOYMENT_GUIDE.md</strong> - 完整部署指南（系统要求、部署步骤、故障排查）</li>
+                            <li><strong>BACKUP_SUMMARY_20260308.md</strong> - 备份总结报告（详细清单、架构图）</li>
+                            <li><strong>VERIFICATION_REPORT.md</strong> - 系统独立性验证报告</li>
+                            <li><strong>create_full_backup.sh</strong> - 自动备份脚本</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="margin: 10px 0 0 0; font-size: 10px; color: #78350f; font-weight: 700;">
+                        🎯 Git提交：030c51f | 📦 完整备份已保存到 /tmp/ | 🌐 GitHub: https://github.com/jamesyidc/1122112211110306
+                    </p>
+                </div>
+                
+                <!-- 🔥🔥 v3.15.1 正数占比显示修复与POIT平仓修复 (2026-03-08) 🔥🔥 -->
+                <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #3b82f6; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);">
+                    <h4 style="margin: 0 0 8px 0; color: #1e40af; font-size: 13px; font-weight: 800;">✅ v3.15.1 - 正数占比显示修复 + POIT账户平仓修复（2026-03-08）</h4>
+                    
+                    <!-- 问题1：正数占比显示滞后 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题1：正数占比显示昨天数据</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>3月8日凌晨0点后，系统仍显示3月7日的正数占比（76.97%）</li>
+                            <li><strong>根因：</strong>后端在每天06:00前使用昨天的数据（避免今天数据不足）</li>
+                            <li><strong>用户需求：</strong>跨日后立即使用新一天的实时数据，无需等到06:00</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复1 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 修复方案1：实时切换到新日期数据（提交：c922f92）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>移除06:00逻辑：</strong>删除"06:00前使用昨天数据"的判断</li>
+                            <li><strong>实时切换：</strong>北京时间00:00后立即切换到新日期数据文件</li>
+                            <li><strong>测试结果：</strong>3月8日 02:14，正数占比显示57.8%（109条记录中63条正数）</li>
+                            <li><strong>数据更新：</strong>每75秒自动更新一次，实时反映市场变化</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 问题2：开仓通知显示未知账户 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题2：开仓通知"交易账户: 未知账户"</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>Telegram通知显示"未知账户"而非实际账户名</li>
+                            <li><strong>根因：</strong>对冲下单API调用缺少accountId参数</li>
+                            <li><strong>影响：</strong>无法识别是哪个账户执行的交易</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复2 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 修复方案2：补充accountId参数（提交：9c771f4）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>修改位置：</strong>templates/okx_trading.html 第9771行</li>
+                            <li><strong>添加参数：</strong>accountId: account.id</li>
+                            <li><strong>账户映射：</strong>main→主账户, fangfang12→Fangfang12, poit_main→POIT主账户 等</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 问题3：POIT账户无法平仓 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题3：POIT主账户无法自动平仓</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>正数占比低于40%但未触发平仓（有6个多单持仓）</li>
+                            <li><strong>根因1：</strong>监控脚本从配置文件读取API密钥失败</li>
+                            <li><strong>根因2：</strong>持仓字段名不一致（pos vs posSize）</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复3 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 修复方案3：硬编码API密钥 + 字段兼容（提交：5e799d1）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>硬编码密钥：</strong>在scripts/positive_ratio_auto_close.py中直接写入5个账户的完整API凭证</li>
+                            <li><strong>字段兼容：</strong>使用 pos.get('pos', pos.get('posSize', 0)) 兼容两种字段名</li>
+                            <li><strong>测试结果：</strong>成功平仓POIT主账户的6个多单（CRO, FIL, SUI, APT, NEAR, CFX）</li>
+                            <li><strong>Telegram通知：</strong>发送成功，显示正确的账户名和平仓结果</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 验证结果 -->
+                    <div style="background: #eff6ff; padding: 10px; border-radius: 4px; border-left: 3px solid #3b82f6;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #1e40af;">🧪 完整验证</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #1e3a8a;">
+                            <li>✅ 正数占比实时切换到新日期（57.8% @ 3月8日）</li>
+                            <li>✅ 开仓通知显示正确账户名</li>
+                            <li>✅ POIT主账户自动平仓功能正常</li>
+                            <li>✅ 5个账户完全独立，互不影响</li>
+                            <li>✅ 后台监控每60秒自动运行，不依赖网页</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="margin: 8px 0 0 0; font-size: 10px; color: #1e40af; font-weight: 600;">
+                        📌 相关提交：c922f92(正数占比) + 9c771f4(开仓通知) + 5e799d1(POIT平仓) | 📄 VERIFICATION_REPORT.md
+                    </p>
+                </div>
+                
+                <!-- 🔥 v3.4 多账户独立配置修复 (2026-03-07) -->
+                <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);">
+                    <h4 style="margin: 0 0 8px 0; color: #065f46; font-size: 13px; font-weight: 800;">✅ v3.4.0 - 5分钟涨速止盈/正数占比止盈 多账户独立配置（2026-03-07）</h4>
+                    
+                    <!-- 问题描述 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题：4个账户配置联动</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>修改一个账户的涨速阈值/正数占比阈值，其他账户也跟着变化</li>
+                            <li><strong>根因1：</strong>默认账户ID设置错误（account_poit_main不在账户列表中）</li>
+                            <li><strong>根因2：</strong>前端硬编码 {{ account.id }}，切换账户时不会更新API路径</li>
+                            <li><strong>根因3：</strong>部分账户缺少配置文件，导致读取失败回退到默认值</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复内容 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 修复方案（提交：5251d52 + c21ed12）</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>修正默认账户：</strong>account_poit_main → account_main</li>
+                            <li><strong>动态账户ID：</strong>所有API调用从 {{ account.id }} 改为 ${account.id}</li>
+                            <li><strong>初始化配置文件：</strong>为所有4个账户创建独立配置文件</li>
+                            <li><strong>账户切换联动：</strong>selectAccount() 自动加载对应账户配置</li>
+                            <li><strong>配置独立存储：</strong>每个账户的配置完全独立，互不影响</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 配置文件结构 -->
+                    <div style="background: #f0fdf4; padding: 10px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #10b981;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #065f46;">📁 配置文件结构：</p>
+                        <pre style="margin: 4px 0; font-family: monospace; font-size: 9px; color: #064e3b;">data/velocity_takeprofit/
+├── account_main_config.json        (主账户)
+├── account_fangfang12_config.json  (Fangfang12)
+├── account_anchor_config.json      (锚点账号)
+└── account_poit_config.json        (POIT)
+
+data/positive_ratio_stoploss/
+├── account_main_config.json
+├── account_fangfang12_config.json
+├── account_anchor_config.json
+└── account_poit_config.json</pre>
+                    </div>
+                    
+                    <!-- 功能验证 -->
+                    <div style="background: #fffbeb; padding: 10px; border-radius: 4px; border-left: 3px solid #f59e0b;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #92400e;">🧪 测试验证：</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #92400e; font-size: 10px;">
+                            <li>✅ 账户切换时自动加载对应配置</li>
+                            <li>✅ 修改一个账户不影响其他账户</li>
+                            <li>✅ 页面刷新后所有配置保持独立</li>
+                            <li>✅ 后端API完全支持多账户参数</li>
+                            <li>✅ UI控件（输入框/开关/状态面板）完全同步</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="margin: 8px 0 0 0; font-size: 10px; color: #065f46; font-weight: 600;">
+                        📌 相关提交：5251d52(涨速多账户) + c21ed12(正数占比多账户) + 版本v3.4.0
+                    </p>
+                </div>
+                
+                <!-- 🔥 v3.0 止盈止损后台自动执行 (2026-02-28) -->
+                <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);">
+                    <h4 style="margin: 0 0 8px 0; color: #065f46; font-size: 13px; font-weight: 800;">✅ v3.0 - 止盈止损后台自动执行 - 无需浏览器打开（2026-02-28）</h4>
+                    
+                    <!-- 问题描述 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #b91c1c;">🐛 问题：浏览器依赖</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #7f1d1d; font-size: 10px;">
+                            <li><strong>现象：</strong>止盈止损需要浏览器保持打开，关闭后无法执行</li>
+                            <li><strong>影响：</strong>夜间/外出时无法自动止盈止损，错过最佳平仓时机</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 修复内容 -->
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #047857;">✅ 解决方案：后台自动监控服务 - 7×24小时运行</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; color: #065f46; font-size: 10px;">
+                            <li><strong>监控进程：</strong>okx-tpsl-monitor（PM2守护，崩溃自动重启）</li>
+                            <li><strong>检查频率：</strong>每60秒自动检查所有账户的持仓盈亏</li>
+                            <li><strong>触发机制：</strong>盈亏达到阈值立即执行平仓</li>
+                            <li><strong>完全独立：</strong>不依赖浏览器，关闭浏览器也能执行</li>
+                            <li><strong>双重止盈：</strong>支持普通止盈止损 + 市场情绪紧急止盈</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 监控账户 -->
+                    <div style="background: #f0fdf4; padding: 10px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #10b981;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #065f46;">📊 监控账户（5个）：</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #064e3b;">
+                            <li>account_main（主账户）</li>
+                            <li>account_fangfang12</li>
+                            <li>account_poit_main（POIT子账户）</li>
+                            <li>account_anchor（锚点账户）</li>
+                            <li>account_dadanini（新增）</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 工作流程 -->
+                    <div style="background: #fffbeb; padding: 10px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #f59e0b;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #92400e;">🎯 工作流程：</p>
+                        <ol style="margin: 4px 0 0 20px; padding-left: 0; font-size: 10px; color: #92400e;">
+                            <li>每60秒扫描所有账户</li>
+                            <li>读取止盈止损配置（data/okx_tpsl_settings/）</li>
+                            <li>获取当前持仓并计算盈亏百分比</li>
+                            <li>检查是否触发：
+                                <ul style="margin: 4px 0 0 15px;">
+                                    <li>市场情绪止盈（优先）：检测到极端信号立即平仓</li>
+                                    <li>普通止盈：盈亏% ≥ 止盈阈值</li>
+                                    <li>普通止损：盈亏% ≤ 止损阈值</li>
+                                </ul>
+                            </li>
+                            <li>执行平仓（调用OKX API设置条件单）</li>
+                            <li>记录执行结果（防止重复执行）</li>
+                            <li>发送Telegram通知</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- 安全机制 -->
+                    <div style="background: #fef2f2; padding: 10px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #dc2626;">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #991b1b;">🔒 安全机制：</p>
+                        <ul style="margin: 4px 0 0 20px; padding: 0; font-size: 10px; color: #991b1b;">
+                            <li>✅ 防重复执行：每个持仓的止盈/止损只执行一次</li>
+                            <li>✅ 执行记录：保存到 {account_id}_tpsl_execution.jsonl</li>
+                            <li>✅ 自动重启：PM2确保进程崩溃后自动恢复</li>
+                            <li>✅ 日志记录：详细记录每次检查和执行过程</li>
+                            <li>✅ 实时通知：Telegram推送执行结果</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 查看状态 -->
+                    <div style="background: #1f2937; color: #10b981; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 9px; margin-bottom: 8px;">
+                        # 查看监控进程<br>
+pm2 list | grep okx-tpsl-monitor<br>
+<br>
+# 查看实时日志<br>
+pm2 logs okx-tpsl-monitor --lines 50<br>
+<br>
+# 日志示例：<br>
+[account_main] 📊 DOT-USDT-SWAP long: 盈亏=0.41%<br>
+[account_main] 🎯 触发止盈: 12.5% >= 12.0%<br>
+[account_main] ✅ 止盈设置成功
+                    </div>
+                    
+                    <p style="margin: 8px 0 0 0; font-size: 10px; color: #065f46; font-weight: 600;">
+                        💡 监控进程已在后台运行，无需手动启动 | 📋 配置文件：data/okx_tpsl_settings/ | 📄 详细文档：FIX_BACKEND_AUTOMATION_2026-02-28.md
+                    </p>
+                </div>
                 
                 <!-- 🔴 重要更新通知 -->
                 <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 2px solid #dc2626; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);">
@@ -3858,6 +4101,179 @@ data/
                     <div class="info-row">
                         <span class="info-label">冻结余额</span>
                         <span class="info-value" id="frozenBalance">-- USDT</span>
+                    </div>
+                </div>
+
+                <!-- 正数占比止盈止损系统 (2026-03-07) -->
+                <div class="info-card" style="margin-top: 16px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 2px solid #3b82f6;">
+                    <h3 style="color: #1e40af; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="display: flex; align-items: center; gap: 6px;">📊 正数占比止盈止损</span>
+                        <button onclick="refreshPositiveRatioStatus()" 
+                                style="padding: 4px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">
+                            🔄 刷新状态
+                        </button>
+                    </h3>
+                    
+                    <div style="font-size: 11px; color: #1e40af; margin-bottom: 12px; padding: 8px; background: rgba(255, 255, 255, 0.6); border-radius: 4px; border-left: 3px solid #3b82f6;">
+                        💡 <strong>说明：</strong>基于正数占比40%阈值自动平仓。上升≥40%平空单，下降<40%平多单
+                    </div>
+                    
+                    <!-- 当前状态显示 -->
+                    <div id="positiveRatioStatusPanel" style="margin-bottom: 12px; padding: 10px; background: rgba(255, 255, 255, 0.8); border-radius: 6px; border: 1px solid #60a5fa;">
+                        <div style="font-size: 12px; font-weight: 600; color: #1e40af; margin-bottom: 8px;">📈 当前状态</div>
+                        <div id="positiveRatioStatusContent" style="font-size: 11px; color: #1e3a8a; line-height: 1.8;">
+                            <div style="text-align: center; padding: 10px; color: #60a5fa;">⏳ 正在加载...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 策略开关 -->
+                    <div style="padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid #3b82f6;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #1e40af; font-weight: 600; font-size: 13px;">🔹 启用止盈止损</span>
+                            <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                                <input type="checkbox" id="positiveRatioStoplossSwitch" onclick="togglePositiveRatioStoploss()" style="opacity: 0; width: 0; height: 0;">
+                                <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px;"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- 阈值设置 -->
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 11px; color: #1e40af; font-weight: 600; display: block; margin-bottom: 4px;">
+                                阈值设置: <span id="positiveRatioThresholdDisplay" style="color: #3b82f6;">40.0</span>%
+                            </label>
+                            <input type="range" 
+                                   id="positiveRatioThresholdSlider" 
+                                   min="30" 
+                                   max="50" 
+                                   step="0.5" 
+                                   value="40" 
+                                   onchange="updatePositiveRatioThreshold(this.value)"
+                                   oninput="updatePositiveRatioThresholdDisplay(this.value)"
+                                   onmouseup="updatePositiveRatioThreshold(this.value)"
+                                   ontouchend="updatePositiveRatioThreshold(this.value)"
+                                   style="width: 100%; height: 6px; border-radius: 5px; background: #dbeafe; outline: none;">
+                            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #60a5fa; margin-top: 2px;">
+                                <span>30%</span>
+                                <span>40%</span>
+                                <span>50%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 单次执行选项 -->
+                        <div style="margin-top: 10px; padding: 6px; background: rgba(255, 255, 255, 0.5); border-radius: 4px;">
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #1e40af; cursor: pointer;">
+                                <input type="checkbox" id="positiveRatioAllowOnce" checked style="width: 14px; height: 14px;">
+                                <span>只允许单次执行（触发后自动关闭）</span>
+                            </label>
+                        </div>
+                        
+                        <div style="font-size: 10px; color: #1e3a8a; margin-top: 10px; line-height: 1.6;">
+                            <strong>执行逻辑：</strong>
+                            <ul style="margin: 4px 0; padding-left: 16px;">
+                                <li>从 <strong>&lt;40%</strong> 上升至 <strong>≥40%</strong> → 平掉所有空单 🟢</li>
+                                <li>从 <strong>≥40%</strong> 下降至 <strong>&lt;40%</strong> → 平掉所有多单 🔴</li>
+                                <li>状态跟踪：记录上次状态，只在跨越阈值时触发</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5分钟涨速止盈系统 (2026-03-07) -->
+                <div class="info-card" style="margin-top: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b;">
+                    <h3 style="color: #92400e; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="display: flex; align-items: center; gap: 6px;">⚡ 5分钟涨速止盈</span>
+                        <button onclick="refreshVelocityStatus()" 
+                                style="padding: 4px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">
+                            🔄 刷新状态
+                        </button>
+                    </h3>
+                    
+                    <div style="font-size: 11px; color: #92400e; margin-bottom: 12px; padding: 8px; background: rgba(255, 255, 255, 0.6); border-radius: 4px; border-left: 3px solid #f59e0b;">
+                        💡 <strong>说明：</strong>基于5分钟涨速自动止盈。最高涨速超阈值平多单，最低涨速低于阈值平空单
+                    </div>
+                    
+                    <!-- 当前状态显示 -->
+                    <div id="velocityStatusPanel" style="margin-bottom: 12px; padding: 10px; background: rgba(255, 255, 255, 0.8); border-radius: 6px; border: 1px solid #fbbf24;">
+                        <div style="font-size: 12px; font-weight: 600; color: #92400e; margin-bottom: 8px;">📊 当前涨速</div>
+                        <div id="velocityStatusContent" style="font-size: 11px; color: #78350f; line-height: 1.8;">
+                            <div style="text-align: center; padding: 10px; color: #d97706;">⏳ 正在加载...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 多单止盈设置 -->
+                    <div style="padding: 10px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border: 1px solid #22c55e; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #15803d; font-weight: 600; font-size: 13px;">🟢 多单止盈</span>
+                            <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                                <input type="checkbox" id="velocityLongEnabled" onclick="toggleVelocityLong()" style="opacity: 0; width: 0; height: 0;">
+                                <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px;"></span>
+                            </label>
+                        </div>
+                        
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 11px; color: #15803d; font-weight: 600; display: block; margin-bottom: 4px;">
+                                最高涨速阈值 (5% ~ 30%):
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="number" 
+                                       id="velocityLongThreshold" 
+                                       min="5" 
+                                       max="30" 
+                                       step="0.5" 
+                                       value="15" 
+                                       onchange="updateVelocityLongThreshold()"
+                                       onblur="updateVelocityLongThreshold()"
+                                       onkeypress="if(event.keyCode===13) updateVelocityLongThreshold()"
+                                       style="width: 80px; padding: 6px 8px; border: 2px solid #22c55e; border-radius: 6px; font-size: 13px; font-weight: 600; color: #15803d; background: white; text-align: center;">
+                                <span style="color: #22c55e; font-weight: 600; font-size: 13px;">%</span>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 10px; color: #15803d; margin-top: 8px;">
+                            <strong>逻辑：</strong>当前5分钟涨速 ≥ 阈值 → 平掉所有多单
+                        </div>
+                    </div>
+                    
+                    <!-- 空单止盈设置 -->
+                    <div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid #ef4444;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #991b1b; font-weight: 600; font-size: 13px;">🔴 空单止盈</span>
+                            <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                                <input type="checkbox" id="velocityShortEnabled" onclick="toggleVelocityShort()" style="opacity: 0; width: 0; height: 0;">
+                                <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px;"></span>
+                            </label>
+                        </div>
+                        
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 11px; color: #991b1b; font-weight: 600; display: block; margin-bottom: 4px;">
+                                最低涨速阈值 (-30% ~ -5%):
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="number" 
+                                       id="velocityShortThreshold" 
+                                       min="-30" 
+                                       max="-5" 
+                                       step="0.5" 
+                                       value="-15" 
+                                       onchange="updateVelocityShortThreshold()"
+                                       onblur="updateVelocityShortThreshold()"
+                                       onkeypress="if(event.keyCode===13) updateVelocityShortThreshold()"
+                                       style="width: 80px; padding: 6px 8px; border: 2px solid #ef4444; border-radius: 6px; font-size: 13px; font-weight: 600; color: #991b1b; background: white; text-align: center;">
+                                <span style="color: #ef4444; font-weight: 600; font-size: 13px;">%</span>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 10px; color: #991b1b; margin-top: 8px;">
+                            <strong>逻辑：</strong>当前5分钟涨速 ≤ 阈值 → 平掉所有空单
+                        </div>
+                    </div>
+                    
+                    <!-- 单次执行选项 -->
+                    <div style="margin-top: 10px; padding: 6px; background: rgba(255, 255, 255, 0.5); border-radius: 4px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #92400e; cursor: pointer;">
+                            <input type="checkbox" id="velocityAllowOnce" checked style="width: 14px; height: 14px;">
+                            <span>触发后自动关闭（需手动重置）</span>
+                        </label>
                     </div>
                 </div>
 
@@ -6418,7 +6834,7 @@ data/
         let currentSymbol = 'BTC-USDT-SWAP';
 
         // 当前账户
-        let currentAccount = 'account_poit_main';
+        let currentAccount = 'account_main';  // 默认选择第一个账户
         let isLoadingAccountSettings = false;  // 防止加载设置时触发保存
         
         // 获取当前选中的账户ID
@@ -7398,7 +7814,8 @@ data/
                         apiSecret: account.apiSecret,
                         passphrase: account.passphrase,
                         instId: instId,
-                        posSide: posSide
+                        posSide: posSide,
+                        accountId: account.id
                     })
                 });
                 
@@ -8003,6 +8420,16 @@ data/
             if (typeof loadStoplossReverseOrders === 'function') loadStoplossReverseOrders();  // 🔄 加载止损反手开单配置
             if (typeof loadMidnightHedgeConfig === 'function') loadMidnightHedgeConfig();  // 🌙 加载0点0分对冲底仓配置
             if (typeof loadCurrentMarketSentiment === 'function') loadCurrentMarketSentiment();  // 🔥 加载当前市场情绪
+            
+            // 🔥 加载正数占比止盈止损配置
+            if (typeof loadPositiveRatioConfig === 'function') loadPositiveRatioConfig().catch(err => console.error('❌ 加载正数占比配置失败:', err));
+            if (typeof refreshPositiveRatioStatus === 'function') refreshPositiveRatioStatus().catch(err => console.error('❌ 刷新正数占比状态失败:', err));
+            
+            // 🔥 加载5分钟涨速止盈配置
+            if (typeof loadVelocityConfig === 'function') loadVelocityConfig().catch(err => console.error('❌ 加载涨速止盈配置失败:', err));
+            if (typeof refreshVelocityStatus === 'function') refreshVelocityStatus().catch(err => console.error('❌ 刷新涨速止盈状态失败:', err));
+            
+            console.log(`✅ [账户切换] 账户 ${accountId} 所有配置加载完成`);
             if (typeof loadAutoStrategySettings === 'function') loadAutoStrategySettings();  // 加载该账户的抄底策略设置
             if (typeof loadAutoStrategySettingsTop === 'function') loadAutoStrategySettingsTop();  // 🆕 加载该账户的追涨策略设置
             if (typeof loadUpRatio0StrategySettings === 'function') loadUpRatio0StrategySettings();  // 🆕 加载该账户的上涨占比0策略设置
@@ -8367,6 +8794,7 @@ data/
                             apiKey: account.apiKey,
                             apiSecret: account.apiSecret,
                             passphrase: account.passphrase,
+                            accountId: account.id,  // 添加账户ID用于TG通知
                             ...orderData
                         })
                     });
@@ -8394,7 +8822,9 @@ data/
             }
             
             // 显示结果并发送Telegram通知
+            const accountName = account.name || currentAccount;
             const resultMsg = `${emoji} 批量开仓完成\n\n` +
+                `【交易账户】${accountName}\n\n` +
                 `【结果统计】\n` +
                 `  • 成功: ${successCount} 个\n` +
                 `  • 失败: ${failCount} 个\n\n` +
@@ -8574,6 +9004,7 @@ data/
                             apiKey: account.apiKey,
                             apiSecret: account.apiSecret,
                             passphrase: account.passphrase,
+                            accountId: account.id,  // 添加账户ID用于TG通知
                             ...orderData
                         })
                     });
@@ -8601,7 +9032,9 @@ data/
             }
             
             // 显示结果并发送Telegram通知
+            const accountName = account.name || currentAccount;
             const resultMsg = `${emoji} 批量开仓完成\n\n` +
+                `【交易账户】${accountName}\n\n` +
                 `成功: ${successCount}/${top8Symbols.length}\n` +
                 `失败: ${failCount}/${top8Symbols.length}\n\n` +
                 `详细结果:\n${results.join('\n')}`;
@@ -8800,6 +9233,7 @@ data/
                             apiKey: account.apiKey,
                             apiSecret: account.apiSecret,
                             passphrase: account.passphrase,
+                            accountId: account.id,  // 添加账户ID用于TG通知
                             ...orderData
                         })
                     });
@@ -8827,7 +9261,9 @@ data/
             }
             
             // 显示结果并发送Telegram通知
+            const accountName = account.name || currentAccount;
             const resultMsg = `${emoji} 批量开仓完成\n\n` +
+                `【交易账户】${accountName}\n\n` +
                 `成功: ${successCount}/${bottom8Symbols.length}\n` +
                 `失败: ${failCount}/${bottom8Symbols.length}\n\n` +
                 `详细结果:\n${results.join('\n')}`;
@@ -8970,7 +9406,8 @@ data/
                                     passphrase: account.passphrase,
                                     instId: position.instId,
                                     posSide: position.posSide,
-                                    closeSize: position.posSize
+                                    closeSize: position.posSize,
+                                    accountId: account.id
                                 })
                             });
                             
@@ -9082,7 +9519,8 @@ data/
                                                 passphrase: account.passphrase,
                                                 instId: position.instId,
                                                 posSide: position.posSide,
-                                                closeSize: position.posSize
+                                                closeSize: position.posSize,
+                                                accountId: account.id
                                             })
                                         });
                                         
@@ -9326,7 +9764,8 @@ data/
                                 passphrase: account.passphrase,
                                 instId: position.instId,
                                 posSide: posSideForClose,  // 使用正确的posSide
-                                closeSize: closeSize  // 指定平仓数量
+                                closeSize: closeSize,  // 指定平仓数量
+                                accountId: account.id
                             })
                         });
                         
@@ -9521,6 +9960,7 @@ data/
                                 apiKey: account.apiKey,
                                 apiSecret: account.apiSecret,
                                 passphrase: account.passphrase,
+                                accountId: account.id,  // ✅ 添加账户ID用于TG通知
                                 ...orderData
                             })
                         });
@@ -15089,9 +15529,782 @@ ${data.sMsg || result.message || ''}`);
 
     </script>
     
+    <!-- ========== 正数占比止盈止损系统 JavaScript (2026-03-07) ========== -->
+    <script>
+        // 全局变量
+        let positiveRatioCheckInterval = null;
+
+        // 1. 初始化正数占比系统
+        async function initPositiveRatioStoploss() {
+            console.log('🔵 [正数占比] 初始化系统');
+            
+            // 加载配置
+            await loadPositiveRatioConfig();
+            
+            // 刷新状态显示
+            await refreshPositiveRatioStatus();
+            
+            // 启动定时检查（每30秒）
+            if (positiveRatioCheckInterval) {
+                clearInterval(positiveRatioCheckInterval);
+            }
+            positiveRatioCheckInterval = setInterval(checkPositiveRatioTrigger, 30000);
+            
+            console.log('✅ [正数占比] 初始化完成，定时检查已启动（30秒间隔）');
+        }
+
+        // 2. 加载配置
+        async function loadPositiveRatioConfig() {
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                console.warn('⚠️ [正数占比] 未选择账户');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/okx-trading/positive-ratio-stoploss/config/${account.id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const config = data.config;
+                    console.log('✅ [正数占比] 配置加载成功:', config);
+                    
+                    // 更新UI
+                    document.getElementById('positiveRatioStoplossSwitch').checked = config.enabled || false;
+                    document.getElementById('positiveRatioThresholdSlider').value = config.threshold || 40;
+                    document.getElementById('positiveRatioThresholdDisplay').textContent = (config.threshold || 40).toFixed(1);
+                    document.getElementById('positiveRatioAllowOnce').checked = config.allow_once || false;
+                } else {
+                    console.error('❌ [正数占比] 配置加载失败:', data.message);
+                }
+            } catch (error) {
+                console.error('❌ [正数占比] 配置加载异常:', error);
+            }
+        }
+
+        // 3. 刷新状态显示
+        async function refreshPositiveRatioStatus() {
+            console.log('🔄 [正数占比] 刷新状态');
+            
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                document.getElementById('positiveRatioStatusContent').innerHTML = 
+                    '<div style="text-align: center; padding: 10px; color: #dc2626;">❌ 请先选择账户</div>';
+                return;
+            }
+            
+            const statusContent = document.getElementById('positiveRatioStatusContent');
+            statusContent.innerHTML = '<div style="text-align: center; padding: 10px; color: #60a5fa;">⏳ 正在加载...</div>';
+            
+            try {
+                // 🔧 获取当前正数占比 - 从统计API获取（更准确）
+                // 💡 优先使用今天的数据，如果今天数据不足，使用最新可用数据
+                let currentRatio = 0;
+                let dataDate = '';
+                
+                // 尝试获取今天的统计数据
+                const statsResponse = await fetch('/api/coin-change-tracker/positive-ratio-stats');
+                const statsData = await statsResponse.json();
+                
+                if (statsData.success && statsData.stats && statsData.stats.positive_ratio) {
+                    // 使用统计API返回的正数占比
+                    currentRatio = statsData.stats.positive_ratio || 0;
+                    dataDate = statsData.stats.date || '';
+                    console.log('📊 [正数占比] 从统计API获取:', {
+                        date: dataDate,
+                        positive_count: statsData.stats.positive_count,
+                        total_count: statsData.stats.total_count,
+                        positive_ratio: currentRatio.toFixed(2) + '%'
+                    });
+                } else {
+                    // 如果统计API失败，回退到计算方式
+                    console.warn('⚠️ [正数占比] 统计API失败，使用计算方式');
+                    const latestResponse = await fetch('/api/coin-change-tracker/latest-change');
+                    const latestData = await latestResponse.json();
+                    
+                    if (latestData.success && latestData.data && latestData.data.changes) {
+                        const changes = latestData.data.changes;
+                        let positiveCount = 0;
+                        let totalCount = 0;
+                        
+                        for (const [coin, info] of Object.entries(changes)) {
+                            if (info.change_pct > 0) positiveCount++;
+                            totalCount++;
+                        }
+                        
+                        currentRatio = totalCount > 0 ? (positiveCount / totalCount) * 100 : 0;
+                        console.log('📊 [正数占比] 计算结果:', {
+                            positiveCount,
+                            totalCount,
+                            currentRatio: currentRatio.toFixed(2) + '%'
+                        });
+                    }
+                }
+                
+                // 获取配置
+                const configResponse = await fetch(`/api/okx-trading/positive-ratio-stoploss/config/${account.id}`);
+                const configData = await configResponse.json();
+                
+                if (configData.success) {
+                    // currentRatio 已经在上面计算好了
+                    const config = configData.config;
+                    const threshold = config.threshold || 40;
+                    const enabled = config.enabled === true;  // 🔥 严格比较，避免 || 运算符问题
+                    const lastStatus = config.last_status || 'unknown';
+                    
+                    console.log('📊 [正数占比] 当前正数占比:', currentRatio.toFixed(2) + '%');
+                    console.log('⚙️ [正数占比] 配置:', config);
+                    console.log('🔍 [正数占比] enabled 值:', enabled, '(原始值:', config.enabled, ')');
+                    
+                    // 🔥 同步配置到UI控件
+                    document.getElementById('positiveRatioStoplossSwitch').checked = enabled;
+                    document.getElementById('positiveRatioThresholdSlider').value = threshold;
+                    document.getElementById('positiveRatioThresholdDisplay').textContent = threshold.toFixed(1);
+                    
+                    console.log('✅ [正数占比] UI已同步 - 开关:', enabled, '阈值:', threshold);
+                    
+                    // 判断当前状态
+                    let currentStatus = currentRatio >= threshold ? 'above' : 'below';
+                    let statusText = currentRatio >= threshold ? 
+                        `<strong style="color: #16a34a;">≥${threshold}%（高位）</strong>` : 
+                        `<strong style="color: #dc2626;">&lt;${threshold}%（低位）</strong>`;
+                    
+                    // 判断是否会触发动作
+                    let nextAction = '';
+                    if (enabled) {
+                        if (lastStatus === 'below' && currentStatus === 'above') {
+                            nextAction = '<div style="color: #16a34a; font-weight: 600; margin-top: 4px;">⬆️ 即将触发：平掉所有空单</div>';
+                        } else if (lastStatus === 'above' && currentStatus === 'below') {
+                            nextAction = '<div style="color: #dc2626; font-weight: 600; margin-top: 4px;">⬇️ 即将触发：平掉所有多单</div>';
+                        } else if (lastStatus === 'unknown') {
+                            nextAction = '<div style="color: #f59e0b; margin-top: 4px;">🆕 首次运行，正在记录初始状态</div>';
+                        } else {
+                            nextAction = '<div style="color: #64748b; margin-top: 4px;">⏸️ 状态未变化，无需执行</div>';
+                        }
+                    } else {
+                        nextAction = '<div style="color: #94a3b8; margin-top: 4px;">⏹️ 系统已关闭</div>';
+                    }
+                    
+                    const updateTime = new Date().toLocaleString('zh-CN', { 
+                        hour12: false,
+                        year: 'numeric',
+                        month: '2-digit', 
+                        day: '2-digit',
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    });
+                    
+                    statusContent.innerHTML = `
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #64748b;">当前正数占比：</span>
+                                <strong style="color: #3b82f6; font-size: 15px;">${currentRatio.toFixed(2)}%</strong>
+                            </div>
+                            ${dataDate ? `<div style="font-size: 11px; color: #94a3b8; text-align: right; margin-top: -4px;">数据日期: ${dataDate.slice(0,4)}-${dataDate.slice(4,6)}-${dataDate.slice(6,8)} | 更新: ${updateTime}</div>` : ''}
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #64748b;">设定阈值：</span>
+                                <strong style="color: #f59e0b;">${threshold.toFixed(1)}%</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #64748b;">当前状态：</span>
+                                ${statusText}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #64748b;">上次状态：</span>
+                                <strong style="color: #64748b;">${lastStatus === 'above' ? '高位' : (lastStatus === 'below' ? '低位' : '未知')}</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #64748b;">系统状态：</span>
+                                <strong style="color: ${enabled ? '#16a34a' : '#dc2626'};">${enabled ? '🟢 已启用' : '🔴 已关闭'}</strong>
+                            </div>
+                            ${nextAction}
+                        </div>
+                    `;
+                } else {
+                    throw new Error('数据获取失败');
+                }
+            } catch (error) {
+                console.error('❌ [正数占比] 状态刷新失败:', error);
+                statusContent.innerHTML = 
+                    '<div style="text-align: center; padding: 10px; color: #dc2626;">❌ 数据加载失败</div>';
+            }
+        }
+
+        // 4. 切换开关
+        async function togglePositiveRatioStoploss() {
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                showNotification('❌ 请先选择账户', 'error');
+                return;
+            }
+            
+            const enabled = document.getElementById('positiveRatioStoplossSwitch').checked;
+            const threshold = parseFloat(document.getElementById('positiveRatioThresholdSlider').value);
+            const allowOnce = document.getElementById('positiveRatioAllowOnce').checked;
+            
+            console.log('🔄 [正数占比] 保存配置:', { enabled, threshold, allowOnce });
+            
+            try {
+                const response = await fetch(`/api/okx-trading/positive-ratio-stoploss/config/${account.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled, threshold, allow_once: allowOnce })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('✅ [正数占比] 配置保存成功，后端返回:', data.config);
+                    showNotification(`✅ 正数占比止盈止损已${enabled ? '启用' : '关闭'}`, 'success');
+                    console.log('🔄 [正数占比] 即将刷新状态面板...');
+                    await refreshPositiveRatioStatus();
+                    console.log('✅ [正数占比] 状态面板刷新完成');
+                } else {
+                    console.error('❌ [正数占比] 配置保存失败:', data.message);
+                    showNotification('❌ 配置保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('❌ [正数占比] 配置保存异常:', error);
+                showNotification('❌ 配置保存异常', 'error');
+            }
+        }
+
+        // 5. 更新阈值显示（只更新显示，不触发保存）
+        function updatePositiveRatioThresholdDisplay(value) {
+            document.getElementById('positiveRatioThresholdDisplay').textContent = parseFloat(value).toFixed(1);
+        }
+        
+        // 6. 更新阈值并保存配置
+        let positiveRatioThresholdTimer = null;
+        function updatePositiveRatioThreshold(value) {
+            const displayValue = parseFloat(value).toFixed(1);
+            document.getElementById('positiveRatioThresholdDisplay').textContent = displayValue;
+            console.log(`📊 [正数占比] 阈值调整为: ${displayValue}%`);
+            
+            // 🔥 防抖：延迟300ms执行，避免拖动滑块时频繁保存
+            if (positiveRatioThresholdTimer) {
+                clearTimeout(positiveRatioThresholdTimer);
+            }
+            
+            positiveRatioThresholdTimer = setTimeout(() => {
+                console.log(`💾 [正数占比] 开始保存阈值: ${displayValue}%`);
+                togglePositiveRatioStoploss();
+            }, 300);
+        }
+
+        // 6. 定时检查并触发
+        async function checkPositiveRatioTrigger() {
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                console.log('⏭️ [正数占比] 未选择账户，跳过检查');
+                return;
+            }
+            
+            const enabled = document.getElementById('positiveRatioStoplossSwitch').checked;
+            if (!enabled) {
+                console.log('⏭️ [正数占比] 系统未启用，跳过检查');
+                return;
+            }
+            
+            console.log('🔍 [正数占比] 开始定时检查...');
+            
+            try {
+                const response = await fetch(`/api/okx-trading/positive-ratio-stoploss/check/${account.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('✅ [正数占比] 检查完成:', data);
+                    
+                    if (data.action && data.action !== 'none') {
+                        // 触发了动作
+                        console.log(`🎯 [正数占比] 触发动作: ${data.action}`);
+                        showNotification(`🎯 正数占比触发: ${data.message}`, 'warning');
+                        
+                        // 如果启用了单次执行，自动关闭开关
+                        if (data.config && !data.config.enabled) {
+                            document.getElementById('positiveRatioStoplossSwitch').checked = false;
+                            showNotification('⚠️ 单次执行模式：系统已自动关闭', 'info');
+                        }
+                        
+                        // 刷新状态
+                        await refreshPositiveRatioStatus();
+                        
+                        // 刷新持仓数据
+                        if (typeof loadAccountPositions === 'function') {
+                            await loadAccountPositions();
+                        }
+                    } else {
+                        console.log('⏸️ [正数占比] 无需执行动作');
+                    }
+                } else {
+                    console.error('❌ [正数占比] 检查失败:', data.message);
+                }
+            } catch (error) {
+                console.error('❌ [正数占比] 检查异常:', error);
+            }
+        }
+
+        // 7. 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎬 [正数占比] DOM加载完成，准备初始化');
+            
+            // 延迟1秒初始化，确保其他系统已就绪
+            setTimeout(() => {
+                initPositiveRatioStoploss();
+            }, 1000);
+        });
+
+        console.log('✅ [正数占比] JavaScript代码已加载');
+    </script>
+
+    <!-- ==================== 5分钟涨速止盈系统 JavaScript (2026-03-07) ==================== -->
+    <script>
+        console.log('🚀 [5分钟涨速止盈] 开始加载...');
+
+        // 全局变量
+        let velocityCheckInterval = null;
+
+        /**
+         * 初始化5分钟涨速止盈系统
+         */
+        async function initVelocityTakeprofitSystem() {
+            console.log('📊 [5分钟涨速止盈] 初始化系统...');
+            
+            try {
+                // 加载配置
+                await loadVelocityConfig();
+                
+                // 刷新状态
+                await refreshVelocityStatus();
+                
+                // 启动定时检查（每30秒）
+                if (velocityCheckInterval) {
+                    clearInterval(velocityCheckInterval);
+                }
+                velocityCheckInterval = setInterval(async () => {
+                    console.log('⏰ [5分钟涨速止盈] 定时检查...');
+                    await refreshVelocityStatus();
+                }, 30000);
+                
+                console.log('✅ [5分钟涨速止盈] 系统初始化完成');
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 初始化失败:', error);
+            }
+        }
+
+        /**
+         * 加载配置
+         */
+        async function loadVelocityConfig() {
+            console.log('📥 [5分钟涨速止盈] 加载配置...');
+            
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                console.warn('⚠️ [5分钟涨速止盈] 未选择账户');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/${account.id}`);
+                const data = await response.json();
+                
+                console.log(`📥 [5分钟涨速止盈] 账户 ${account.id} 配置:`, data.config);
+                
+                if (data.success && data.config) {
+                    const config = data.config;
+                    console.log('✅ [5分钟涨速止盈] 配置加载成功:', config);
+                    
+                    // 更新UI
+                    document.getElementById('velocityLongEnabled').checked = config.long_enabled || false;
+                    document.getElementById('velocityShortEnabled').checked = config.short_enabled || false;
+                    document.getElementById('velocityLongThreshold').value = config.max_velocity_threshold || 15.0;
+                    document.getElementById('velocityShortThreshold').value = config.min_velocity_threshold || -15.0;
+                    document.getElementById('velocityAllowOnce').checked = config.auto_close || false;
+                } else {
+                    console.warn('⚠️ [5分钟涨速止盈] 配置加载失败，使用默认值');
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 加载配置异常:', error);
+            }
+        }
+
+        /**
+         * 刷新状态
+         */
+        async function refreshVelocityStatus() {
+            console.log('🔄 [5分钟涨速止盈] 刷新状态...');
+            
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                console.warn('⚠️ [5分钟涨速止盈] 未选择账户');
+                return;
+            }
+            
+            try {
+                // 获取配置
+                const configResponse = await fetch(`/api/okx-trading/velocity-takeprofit/config/${account.id}`);
+                const configData = await configResponse.json();
+                
+                if (!configData.success || !configData.config) {
+                    console.error('❌ [5分钟涨速止盈] 获取配置失败');
+                    return;
+                }
+                
+                const config = configData.config;
+                const currentVelocity = config.current_velocity || 0;
+                const longThreshold = config.max_velocity_threshold || 15.0;
+                const shortThreshold = config.min_velocity_threshold || -15.0;
+                const longEnabled = config.long_enabled || false;
+                const shortEnabled = config.short_enabled || false;
+                const longPermission = config.long_permission !== false;
+                const shortPermission = config.short_permission !== false;
+                
+                // 🔴 同步更新下面的输入框和开关
+                document.getElementById('velocityLongEnabled').checked = longEnabled;
+                document.getElementById('velocityShortEnabled').checked = shortEnabled;
+                document.getElementById('velocityLongThreshold').value = longThreshold;
+                document.getElementById('velocityShortThreshold').value = shortThreshold;
+                
+                // 构建状态HTML
+                let statusHtml = `
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-size: 18px; font-weight: bold; color: white;">当前5分钟涨速</span>
+                            <span style="font-size: 24px; font-weight: bold; color: ${currentVelocity >= 0 ? '#4ade80' : '#f87171'};">
+                                ${currentVelocity >= 0 ? '+' : ''}${currentVelocity.toFixed(2)}%
+                            </span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.9);">
+                            <div>
+                                <span>做多止盈阈值:</span>
+                                <span style="font-weight: bold; color: #4ade80;">+${longThreshold.toFixed(1)}%</span>
+                            </div>
+                            <div>
+                                <span>做空止盈阈值:</span>
+                                <span style="font-weight: bold; color: #f87171;">${shortThreshold.toFixed(1)}%</span>
+                            </div>
+                            <div>
+                                <span>做多止盈:</span>
+                                <span style="font-weight: bold;">${longEnabled ? '🟢 已启用' : '⚫ 未启用'}</span>
+                            </div>
+                            <div>
+                                <span>做空止盈:</span>
+                                <span style="font-weight: bold;">${shortEnabled ? '🟢 已启用' : '⚫ 未启用'}</span>
+                            </div>
+                            <div>
+                                <span>做多执行权限:</span>
+                                <span style="font-weight: bold; color: ${longPermission ? '#4ade80' : '#f87171'};">
+                                    ${longPermission ? '✅ 允许' : '🚫 已锁定'}
+                                </span>
+                            </div>
+                            <div>
+                                <span>做空执行权限:</span>
+                                <span style="font-weight: bold; color: ${shortPermission ? '#4ade80' : '#f87171'};">
+                                    ${shortPermission ? '✅ 允许' : '🚫 已锁定'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 添加预期动作提示
+                let actionHtml = '';
+                if (longEnabled && currentVelocity >= longThreshold && longPermission) {
+                    actionHtml = '<div style="background: #4ade80; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold;">⬆️ 涨速超过阈值，即将平掉所有多单！</div>';
+                } else if (shortEnabled && currentVelocity <= shortThreshold && shortPermission) {
+                    actionHtml = '<div style="background: #f87171; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold;">⬇️ 跌速超过阈值，即将平掉所有空单！</div>';
+                } else if ((longEnabled && !longPermission) || (shortEnabled && !shortPermission)) {
+                    actionHtml = '<div style="background: #f59e0b; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold;">🔒 执行权限已锁定，需手动解锁</div>';
+                } else if (!longEnabled && !shortEnabled) {
+                    actionHtml = '<div style="background: #6b7280; color: white; padding: 10px; border-radius: 5px; text-align: center;">⚪ 系统未启用</div>';
+                } else {
+                    actionHtml = '<div style="background: #3b82f6; color: white; padding: 10px; border-radius: 5px; text-align: center;">📊 监控中...</div>';
+                }
+                
+                document.getElementById('velocityStatusPanel').innerHTML = statusHtml + actionHtml;
+                
+                console.log('✅ [5分钟涨速止盈] 状态刷新完成');
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 刷新状态异常:', error);
+                document.getElementById('velocityStatusPanel').innerHTML = '<div style="background: #ef4444; color: white; padding: 10px; border-radius: 5px; text-align: center;">❌ 状态刷新失败</div>';
+            }
+        }
+
+        /**
+         * 切换做多止盈开关
+         */
+        async function toggleVelocityLong() {
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                showNotification('❌ 请先选择账户', 'error');
+                return;
+            }
+            
+            const enabled = document.getElementById('velocityLongEnabled').checked;
+            console.log(`🔄 [5分钟涨速止盈] 账户 ${account.id} 切换做多止盈: ${enabled ? '启用' : '关闭'}`);
+            
+            try {
+                const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
+                const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
+                const shortEnabled = document.getElementById('velocityShortEnabled').checked;
+                const autoClose = document.getElementById('velocityAllowOnce').checked;
+                
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/${account.id}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        long_enabled: enabled,
+                        short_enabled: shortEnabled,
+                        max_velocity_threshold: longThreshold,
+                        min_velocity_threshold: shortThreshold,
+                        auto_close: autoClose
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ [5分钟涨速止盈] 做多止盈配置保存成功');
+                    showNotification(`✅ 做多止盈已${enabled ? '启用' : '关闭'}`);
+                    await refreshVelocityStatus();
+                } else {
+                    console.error('❌ [5分钟涨速止盈] 保存配置失败:', data.message);
+                    showNotification('❌ 保存配置失败: ' + (data.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 切换做多止盈异常:', error);
+                showNotification('❌ 操作失败: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * 切换做空止盈开关
+         */
+        async function toggleVelocityShort() {
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                showNotification('❌ 请先选择账户', 'error');
+                return;
+            }
+            
+            const enabled = document.getElementById('velocityShortEnabled').checked;
+            console.log(`🔄 [5分钟涨速止盈] 账户 ${account.id} 切换做空止盈: ${enabled ? '启用' : '关闭'}`);
+            
+            try {
+                const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
+                const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
+                const longEnabled = document.getElementById('velocityLongEnabled').checked;
+                const autoClose = document.getElementById('velocityAllowOnce').checked;
+                
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/${account.id}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        long_enabled: longEnabled,
+                        short_enabled: enabled,
+                        max_velocity_threshold: longThreshold,
+                        min_velocity_threshold: shortThreshold,
+                        auto_close: autoClose
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ [5分钟涨速止盈] 做空止盈配置保存成功');
+                    showNotification(`✅ 做空止盈已${enabled ? '启用' : '关闭'}`);
+                    await refreshVelocityStatus();
+                } else {
+                    console.error('❌ [5分钟涨速止盈] 保存配置失败:', data.message);
+                    showNotification('❌ 保存配置失败: ' + (data.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 切换做空止盈异常:', error);
+                showNotification('❌ 操作失败: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * 更新做多阈值
+         */
+        let velocityLongThresholdTimer = null;
+        async function updateVelocityLongThreshold() {
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                console.warn('⚠️ [5分钟涨速止盈] 未选择账户');
+                return;
+            }
+            
+            const value = parseFloat(document.getElementById('velocityLongThreshold').value);
+            console.log(`📊 [5分钟涨速止盈] 账户 ${account.id} 做多阈值输入: +${value.toFixed(1)}%`);
+            
+            // 🔥 防抖：延迟500ms执行，避免频繁请求
+            if (velocityLongThresholdTimer) {
+                clearTimeout(velocityLongThresholdTimer);
+            }
+            
+            velocityLongThresholdTimer = setTimeout(async () => {
+                console.log(`💾 [5分钟涨速止盈] 账户 ${account.id} 开始保存做多阈值: +${value.toFixed(1)}%`);
+                
+                // 🔥 直接保存配置，不依赖开关状态
+                try {
+                    const longEnabled = document.getElementById('velocityLongEnabled').checked;
+                    const shortEnabled = document.getElementById('velocityShortEnabled').checked;
+                    const shortThreshold = parseFloat(document.getElementById('velocityShortThreshold').value);
+                    const autoClose = document.getElementById('velocityAllowOnce') ? document.getElementById('velocityAllowOnce').checked : false;
+                    
+                    console.log(`📤 [5分钟涨速止盈] 账户 ${account.id} 提交配置: long=${longEnabled}, short=${shortEnabled}, longThreshold=${value}, shortThreshold=${shortThreshold}`);
+                    
+                    const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/${account.id}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            long_enabled: longEnabled,
+                            short_enabled: shortEnabled,
+                            max_velocity_threshold: value,
+                            min_velocity_threshold: shortThreshold,
+                            auto_close: autoClose
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        console.log('✅ [5分钟涨速止盈] 做多阈值保存成功');
+                        showNotification(`✅ 做多阈值已更新为 +${value.toFixed(1)}%`);
+                        await refreshVelocityStatus();
+                    } else {
+                        console.error('❌ [5分钟涨速止盈] 保存失败:', data.message);
+                        showNotification('❌ 保存失败: ' + (data.message || '未知错误'), 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ [5分钟涨速止盈] 更新做多阈值异常:', error);
+                    showNotification('❌ 保存失败: ' + error.message, 'error');
+                }
+            }, 500);
+        }
+
+        /**
+         * 更新做空阈值
+         */
+        let velocityShortThresholdTimer = null;
+        async function updateVelocityShortThreshold() {
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                console.warn('⚠️ [5分钟涨速止盈] 未选择账户');
+                return;
+            }
+            
+            const value = parseFloat(document.getElementById('velocityShortThreshold').value);
+            console.log(`📊 [5分钟涨速止盈] 账户 ${account.id} 做空阈值输入: ${value.toFixed(1)}%`);
+            
+            // 🔥 防抖：延迟500ms执行，避免频繁请求
+            if (velocityShortThresholdTimer) {
+                clearTimeout(velocityShortThresholdTimer);
+            }
+            
+            velocityShortThresholdTimer = setTimeout(async () => {
+                console.log(`💾 [5分钟涨速止盈] 账户 ${account.id} 开始保存做空阈值: ${value.toFixed(1)}%`);
+                
+                // 🔥 直接保存配置，不依赖开关状态
+                try {
+                    const longEnabled = document.getElementById('velocityLongEnabled').checked;
+                    const shortEnabled = document.getElementById('velocityShortEnabled').checked;
+                    const longThreshold = parseFloat(document.getElementById('velocityLongThreshold').value);
+                    const autoClose = document.getElementById('velocityAllowOnce') ? document.getElementById('velocityAllowOnce').checked : false;
+                    
+                    console.log(`📤 [5分钟涨速止盈] 账户 ${account.id} 提交配置: long=${longEnabled}, short=${shortEnabled}, longThreshold=${longThreshold}, shortThreshold=${value}`);
+                    
+                    const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/${account.id}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            long_enabled: longEnabled,
+                            short_enabled: shortEnabled,
+                            max_velocity_threshold: longThreshold,
+                            min_velocity_threshold: value,
+                            auto_close: autoClose
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        console.log('✅ [5分钟涨速止盈] 做空阈值保存成功');
+                        showNotification(`✅ 做空阈值已更新为 ${value.toFixed(1)}%`);
+                        await refreshVelocityStatus();
+                    } else {
+                        console.error('❌ [5分钟涨速止盈] 保存失败:', data.message);
+                        showNotification('❌ 保存失败: ' + (data.message || '未知错误'), 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ [5分钟涨速止盈] 更新做空阈值异常:', error);
+                    showNotification('❌ 保存失败: ' + error.message, 'error');
+                }
+            }, 500);
+        }
+
+        /**
+         * 手动刷新状态
+         */
+        async function refreshVelocityTakeprofitStatus() {
+            console.log('🔄 [5分钟涨速止盈] 手动刷新状态...');
+            showNotification('🔄 正在刷新状态...');
+            await refreshVelocityStatus();
+            showNotification('✅ 状态刷新完成');
+        }
+
+        /**
+         * 解锁执行权限
+         */
+        async function unlockVelocityPermissions() {
+            const account = accounts.find(acc => acc.id === currentAccount);
+            if (!account) {
+                showNotification('❌ 请先选择账户', 'error');
+                return;
+            }
+            
+            console.log(`🔓 [5分钟涨速止盈] 账户 ${account.id} 解锁执行权限...`);
+            
+            try {
+                const response = await fetch(`/api/okx-trading/velocity-takeprofit/config/${account.id}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        long_permission: true,
+                        short_permission: true
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ [5分钟涨速止盈] 执行权限已解锁');
+                    showNotification('✅ 执行权限已解锁');
+                    await refreshVelocityStatus();
+                } else {
+                    console.error('❌ [5分钟涨速止盈] 解锁失败:', data.message);
+                    showNotification('❌ 解锁失败: ' + (data.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('❌ [5分钟涨速止盈] 解锁异常:', error);
+                showNotification('❌ 解锁失败: ' + error.message, 'error');
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 [5分钟涨速止盈] DOMContentLoaded，延迟1秒后初始化...');
+            setTimeout(() => {
+                initVelocityTakeprofitSystem();
+            }, 1000);
+        });
+
+        console.log('✅ [5分钟涨速止盈] JavaScript代码已加载');
+    </script>
+    
     <!-- 🔴 立即执行的版本验证脚本 -->
     <script>
-        console.log('🚀 页面版本: v2.9.4-FIX-FINAL-20260303-17:28 | 缓存戳: 20260303172848');
+        console.log('🚀 页面版本: v3.5.0-DOCS-REORGANIZE-20260307-16:30 | 缓存戳: 20260307163000');
         console.log('⏰ 当前时间:', new Date().toISOString());
         console.log('🔍 检查关键元素是否存在...');
         

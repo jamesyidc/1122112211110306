@@ -6,11 +6,11 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>SAR偏向趋势图 - 24小时分页 v2.2-1day</title>
+    <title>SAR偏向趋势图 - 24小时分页 v2.3-calendar</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script>
         // 版本检查与缓存清除
-        const CURRENT_VERSION = '2.2-1day-5min';
+        const CURRENT_VERSION = '2.3-calendar';
         const STORED_VERSION = localStorage.getItem('sar_bias_trend_version');
         
         if (STORED_VERSION !== CURRENT_VERSION) {
@@ -251,6 +251,188 @@
             color: #8b92b8;
             font-size: 12px;
             margin-top: 20px;
+        }
+        
+        /* 日历选择器样式 */
+        .date-picker-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .date-picker-content {
+            background: #2a2d47;
+            border: 2px solid rgba(59, 125, 255, 0.4);
+            border-radius: 12px;
+            padding: 24px;
+            min-width: 360px;
+            max-width: 420px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        
+        .date-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+        
+        .month-nav-btn {
+            background: rgba(59, 125, 255, 0.2);
+            border: 1px solid rgba(59, 125, 255, 0.4);
+            color: #5a92ff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .month-nav-btn:hover {
+            background: rgba(59, 125, 255, 0.4);
+            border-color: #5a92ff;
+            transform: scale(1.05);
+        }
+        
+        .month-year-selector {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .month-year-selector select {
+            background: rgba(30, 33, 57, 0.8);
+            border: 1px solid rgba(59, 125, 255, 0.3);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .month-year-selector select:hover {
+            border-color: #5a92ff;
+            background: rgba(59, 125, 255, 0.1);
+        }
+        
+        #yearSelect {
+            width: 90px;
+        }
+        
+        #monthSelect {
+            width: 80px;
+        }
+        
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+            text-align: center;
+            color: #8b92b8;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            background: rgba(30, 33, 57, 0.5);
+            color: #8b92b8;
+        }
+        
+        .calendar-day.other-month {
+            opacity: 0.3;
+            cursor: default;
+        }
+        
+        .calendar-day.available {
+            color: #fff;
+            background: rgba(59, 125, 255, 0.15);
+            border-color: rgba(59, 125, 255, 0.3);
+            cursor: pointer;
+        }
+        
+        .calendar-day.available:hover {
+            background: rgba(59, 125, 255, 0.3);
+            border-color: #5a92ff;
+            transform: scale(1.05);
+        }
+        
+        .calendar-day.today {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .calendar-day.selected {
+            background: #5a92ff;
+            border-color: #5a92ff;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .date-picker-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .date-picker-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .date-picker-btn.cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #8b92b8;
+        }
+        
+        .date-picker-btn.cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        
+        .date-picker-btn.today {
+            background: #5a92ff;
+            color: #fff;
+        }
+        
+        .date-picker-btn.today:hover {
+            background: #4a82ef;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(90, 146, 255, 0.4);
         }
         
         .timezone-badge {
@@ -754,7 +936,7 @@ curl localhost:5000/api/sar-slope/bias-ratios
             </button>
             
             <div class="page-info">
-                <div class="page-date" id="currentDate">
+                <div class="page-date" id="currentDate" onclick="showDatePicker()" style="cursor: pointer; user-select: none;" title="点击选择日期">
                     加载中...
                 </div>
                 <div class="page-time-range" id="timeRangeDisplay">
@@ -765,6 +947,41 @@ curl localhost:5000/api/sar-slope/bias-ratios
             <button class="page-btn" id="nextBtn" onclick="nextPage()">
                 后一天 →
             </button>
+        </div>
+        
+        <!-- 日历选择器弹窗 -->
+        <div id="datePickerModal" class="date-picker-modal" style="display: none;" onclick="hideDatePickerIfClickedOutside(event)">
+            <div class="date-picker-content" onclick="event.stopPropagation();">
+                <div class="date-picker-header">
+                    <button class="month-nav-btn" onclick="changeMonth(-1)">◀</button>
+                    <div class="month-year-selector">
+                        <select id="yearSelect" onchange="renderCalendar()"></select>
+                        <select id="monthSelect" onchange="renderCalendar()">
+                            <option value="1">1月</option>
+                            <option value="2">2月</option>
+                            <option value="3">3月</option>
+                            <option value="4">4月</option>
+                            <option value="5">5月</option>
+                            <option value="6">6月</option>
+                            <option value="7">7月</option>
+                            <option value="8">8月</option>
+                            <option value="9">9月</option>
+                            <option value="10">10月</option>
+                            <option value="11">11月</option>
+                            <option value="12">12月</option>
+                        </select>
+                    </div>
+                    <button class="month-nav-btn" onclick="changeMonth(1)">▶</button>
+                </div>
+                <div class="calendar-weekdays">
+                    <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+                </div>
+                <div id="calendarDays" class="calendar-days"></div>
+                <div class="date-picker-footer">
+                    <button class="date-picker-btn cancel" onclick="hideDatePicker()">取消</button>
+                    <button class="date-picker-btn today" onclick="selectToday()">今天</button>
+                </div>
+            </div>
         </div>
         
         <div class="stats-cards">
@@ -863,6 +1080,12 @@ curl localhost:5000/api/sar-slope/bias-ratios
         let updateInterval = null;
         let countdownInterval = null;
         let nextUpdateTime = null;
+        
+        // 日历选择器相关变量
+        let availableDates = new Set(); // 存储可用日期
+        let selectedYear = new Date().getFullYear();
+        let selectedMonth = new Date().getMonth() + 1;
+        let currentDisplayDate = null; // 当前显示的日期（字符串格式：YYYY-MM-DD）
         
         // 初始化图表
         function initChart() {
@@ -1398,6 +1621,214 @@ curl localhost:5000/api/sar-slope/bias-ratios
                 chart.dispose();
             }
         });
+        
+        // ==================== 日历选择器功能 ====================
+        
+        // 显示日历选择器
+        function showDatePicker() {
+            const modal = document.getElementById('datePickerModal');
+            modal.style.display = 'flex';
+            
+            // 初始化年份选择器（2024-当前年+1）
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.innerHTML = '';
+            const currentYear = new Date().getFullYear();
+            for (let year = 2024; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year + '年';
+                if (year === selectedYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+            
+            // 设置月份选择器
+            document.getElementById('monthSelect').value = selectedMonth;
+            
+            // 渲染日历
+            renderCalendar();
+        }
+        
+        // 隐藏日历选择器
+        function hideDatePicker() {
+            document.getElementById('datePickerModal').style.display = 'none';
+        }
+        
+        // 点击遮罩层隐藏
+        function hideDatePickerIfClickedOutside(event) {
+            if (event.target.id === 'datePickerModal') {
+                hideDatePicker();
+            }
+        }
+        
+        // 渲染日历
+        function renderCalendar() {
+            selectedYear = parseInt(document.getElementById('yearSelect').value);
+            selectedMonth = parseInt(document.getElementById('monthSelect').value);
+            
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+            
+            // 获取当月第一天和最后一天
+            const firstDay = new Date(selectedYear, selectedMonth - 1, 1);
+            const lastDay = new Date(selectedYear, selectedMonth, 0);
+            const firstDayOfWeek = firstDay.getDay(); // 0=周日
+            const daysInMonth = lastDay.getDate();
+            
+            // 获取上个月的最后几天
+            const prevMonthLastDay = new Date(selectedYear, selectedMonth - 1, 0).getDate();
+            
+            // 今天的日期
+            const today = new Date();
+            const todayStr = formatDate(today);
+            
+            // 填充上个月的日期
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const day = prevMonthLastDay - i;
+                const dayEl = createDayElement(day, true, null);
+                calendarDays.appendChild(dayEl);
+            }
+            
+            // 填充当月日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = dateStr === todayStr;
+                const isSelected = dateStr === currentDisplayDate;
+                const isAvailable = availableDates.has(dateStr);
+                
+                const dayEl = createDayElement(day, false, dateStr, isToday, isSelected, isAvailable);
+                calendarDays.appendChild(dayEl);
+            }
+            
+            // 填充下个月的日期（补足6行）
+            const totalCells = calendarDays.children.length;
+            const remainingCells = 42 - totalCells; // 6行 x 7列 = 42格
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayEl = createDayElement(day, true, null);
+                calendarDays.appendChild(dayEl);
+            }
+        }
+        
+        // 创建日期元素
+        function createDayElement(day, isOtherMonth, dateStr, isToday = false, isSelected = false, isAvailable = false) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            dayEl.textContent = day;
+            
+            if (isOtherMonth) {
+                dayEl.classList.add('other-month');
+            } else {
+                if (isToday) dayEl.classList.add('today');
+                if (isSelected) dayEl.classList.add('selected');
+                if (isAvailable) {
+                    dayEl.classList.add('available');
+                    dayEl.onclick = () => selectDate(dateStr);
+                    dayEl.title = `选择 ${dateStr}`;
+                } else {
+                    dayEl.style.cursor = 'default';
+                    dayEl.title = `${dateStr} - 无数据`;
+                }
+            }
+            
+            return dayEl;
+        }
+        
+        // 选择日期
+        function selectDate(dateStr) {
+            console.log('📅 选择日期:', dateStr);
+            currentDisplayDate = dateStr;
+            
+            // 调用API加载该日期的数据
+            // 由于当前API是基于page的，我们需要找到对应的page
+            // 暂时使用简单的方法：根据日期计算page（假设每天1个page，从今天往前推）
+            const today = new Date();
+            const selectedDate = new Date(dateStr);
+            const daysDiff = Math.floor((today - selectedDate) / (1000 * 60 * 60 * 24));
+            const targetPage = daysDiff + 1;
+            
+            hideDatePicker();
+            loadTrendData(targetPage);
+        }
+        
+        // 选择今天
+        function selectToday() {
+            const todayStr = formatDate(new Date());
+            selectDate(todayStr);
+        }
+        
+        // 切换月份
+        function changeMonth(delta) {
+            selectedMonth += delta;
+            if (selectedMonth < 1) {
+                selectedMonth = 12;
+                selectedYear--;
+            } else if (selectedMonth > 12) {
+                selectedMonth = 1;
+                selectedYear++;
+            }
+            
+            document.getElementById('yearSelect').value = selectedYear;
+            document.getElementById('monthSelect').value = selectedMonth;
+            renderCalendar();
+        }
+        
+        // 格式化日期为 YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 加载可用日期列表
+        async function loadAvailableDates() {
+            try {
+                console.log('📅 正在加载可用日期列表...');
+                
+                // 从API获取所有有数据的日期
+                const response = await fetch('/api/sar-slope/available-dates');
+                const data = await response.json();
+                
+                if (data.success && data.dates) {
+                    availableDates = new Set(data.dates);
+                    console.log('✅ 已加载可用日期数量:', data.count, '| 范围:', data.dates[data.dates.length - 1], '→', data.dates[0]);
+                } else {
+                    // Fallback: 假设最近60天都有数据
+                    console.warn('⚠️ API返回失败，使用fallback方法');
+                    const dates = new Set();
+                    const today = new Date();
+                    for (let i = 0; i < 60; i++) {
+                        const date = new Date(today);
+                        date.setDate(date.getDate() - i);
+                        dates.add(formatDate(date));
+                    }
+                    availableDates = dates;
+                    console.log('✅ Fallback: 已加载可用日期数量:', dates.size);
+                }
+            } catch (error) {
+                console.error('❌ 加载可用日期失败:', error);
+                // Fallback
+                const dates = new Set();
+                const today = new Date();
+                for (let i = 0; i < 60; i++) {
+                    const date = new Date(today);
+                    date.setDate(date.getDate() - i);
+                    dates.add(formatDate(date));
+                }
+                availableDates = dates;
+                console.log('✅ 异常后Fallback: 已加载可用日期数量:', dates.size);
+            }
+        }
+        
+        // 页面加载时初始化可用日期
+        (async function initDatePicker() {
+            await loadAvailableDates();
+            
+            // 设置当前显示的日期
+            const todayStr = formatDate(new Date());
+            currentDisplayDate = todayStr;
+            selectedYear = new Date().getFullYear();
+            selectedMonth = new Date().getMonth() + 1;
+        })();
     </script>
 </body>
 </html>

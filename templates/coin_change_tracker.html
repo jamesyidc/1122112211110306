@@ -7,10 +7,13 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <!-- 🔥 强制版本更新 2026-03-04 -->
-    <meta name="version" content="3.7.0-20260304-performance-lite">
-    <meta http-equiv="last-modified" content="2026-03-04T19:30:00+08:00">
-    <title>27币涨跌幅追踪系统 v3.7.0</title>
+    <!-- 🔥🔥🔥 ULTRA CRITICAL FIX - FORCE CACHE CLEAR 2026-03-06 05:00 -->
+    <meta name="version" content="3.9.2-ULTRA-CACHE-CLEAR-V11">
+    <meta http-equiv="last-modified" content="2026-03-06T05:00:00+08:00">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache, no-store">
+    <meta http-equiv="Expires" content="-1">
+    <title>27币涨跌幅追踪系统 v3.9.2-V11</title>
     
     <!-- 🔥 立即清除所有缓存和Service Worker -->
     <script>
@@ -48,12 +51,12 @@
             });
         }
         
-        console.log('🔥 缓存清理脚本已执行 - v3.6.3');
+        console.log('🔥🔥🔥🔥🔥🔥🔥 缓存清理脚本已执行 - v3.9.2-ULTRA-CACHE-CLEAR-V11 - 加载时间:', new Date().toLocaleString('zh-CN', {timeZone: 'Asia/Shanghai'}));
     })();
     </script>
     <!-- 
     ============================================================
-    版本: 2026-03-06 v3.8.0 (新增正数占比统计功能 + 修复显示问题)
+    版本: 2026-03-06 v3.9.2 (完整实现Tooltip正数占比显示 + 折叠面板默认展开)
     ============================================================
     
     🔥 最新更新：27币涨跌幅之和正数占比统计 (2026-03-06)
@@ -653,9 +656,10 @@
         }
     </style>
     
-    <!-- 🔥 版本信息横幅 - 帮助用户确认是否加载了最新版本 -->
+    <!-- 🔥🔥🔥 版本信息横幅 - 帮助用户确认是否加载了最新版本 -->
     <div id="versionBanner" style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(90deg, #10b981 0%, #059669 100%); color: white; text-align: center; padding: 8px; z-index: 10000; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-        ✅ 已加载最新版本 v3.6.3 (缓存已清除) - 2026-03-02
+        ✅ 已加载最新版本 v3.9.2-ULTRA-CACHE-CLEAR-V11 (正数占比完整修复) - 2026-03-06 05:00
+        <button onclick="location.reload(true)" style="background: #dc2626; border: none; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; margin-left: 20px; font-size: 12px; font-weight: bold;">🔥 强制刷新</button>
         <button onclick="this.parentElement.style.display='none'" style="float: right; background: rgba(255,255,255,0.2); border: none; color: white; padding: 2px 10px; border-radius: 4px; cursor: pointer; margin-right: 20px; font-size: 12px;">关闭</button>
     </div>
     <div style="height: 40px;"></div> <!-- Spacer for fixed banner -->
@@ -721,6 +725,449 @@
             </div>
             <div class="doc-panel-content hidden p-6 bg-gray-50" id="docPanelContent">
                 <div class="space-y-6">
+                    
+                    <!-- 最新更新 V3.12 (2026-03-07) - 正数占比多空转换监控 -->
+                    <div class="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg p-6 shadow-md border-2 border-orange-400">
+                        <h3 class="text-lg font-bold text-orange-800 mb-4 border-b-2 border-orange-500 pb-2">
+                            <i class="fas fa-exchange-alt text-orange-600 mr-2"></i>
+                            🔄 V3.12 正数占比多空转换监控 (2026-03-07)
+                        </h3>
+                        <div class="space-y-4 text-sm text-gray-700">
+                            
+                            <!-- 核心功能 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-orange-500">
+                                <h4 class="font-bold text-orange-800 mb-2">
+                                    <i class="fas fa-chart-line mr-2"></i>
+                                    📊 多空转换监控功能
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-orange-700">监控逻辑：</p>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs">
+                                        <li><strong>多空分界线：</strong>40%（正数占比阈值）</li>
+                                        <li><strong>转多信号：</strong>正数占比从 &lt;40% 上升到 ≥40%，发送TG通知「转多」</li>
+                                        <li><strong>转空信号：</strong>正数占比从 ≥40% 下降到 &lt;40%，发送TG通知「转空」</li>
+                                        <li><strong>检查频率：</strong>每60秒检查一次</li>
+                                        <li><strong>数据来源：</strong><code>/api/coin-change-tracker/positive-ratio-stats</code></li>
+                                        <li><strong>初始状态：</strong>46.36%（多头）✅</li>
+                                    </ul>
+                                    <div class="bg-orange-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-orange-800"><strong>💡 使用场景：</strong>正数占比反映市场整体多空力量对比。当突破40%阈值时，说明市场情绪发生重要转换，系统会自动发送Telegram通知，帮助把握多空转换时机。</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 信号说明 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-green-500">
+                                <h4 class="font-bold text-green-800 mb-2">
+                                    <i class="fas fa-signal mr-2"></i>
+                                    📡 信号含义与操作建议
+                                </h4>
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    <div class="bg-green-50 p-3 rounded border border-green-200">
+                                        <p class="font-bold text-green-700 mb-2">🟢 转多信号（&lt;40% → ≥40%）</p>
+                                        <ul class="space-y-1">
+                                            <li><strong>含义：</strong>市场从空头转向多头</li>
+                                            <li><strong>操作：</strong>逢低做多，寻找支撑位入场</li>
+                                            <li><strong>状态：</strong>🔴 空方 → 🟢 多方</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-red-50 p-3 rounded border border-red-200">
+                                        <p class="font-bold text-red-700 mb-2">🔴 转空信号（≥40% → &lt;40%）</p>
+                                        <ul class="space-y-1">
+                                            <li><strong>含义：</strong>市场从多头转向空头</li>
+                                            <li><strong>操作：</strong>逢高做空，寻找阻力位入场</li>
+                                            <li><strong>状态：</strong>🟢 多方 → 🔴 空方</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Telegram通知格式 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-blue-500">
+                                <h4 class="font-bold text-blue-800 mb-2">
+                                    <i class="fas fa-paper-plane mr-2"></i>
+                                    📱 Telegram通知格式
+                                </h4>
+                                <div class="bg-gray-100 p-3 rounded">
+                                    <p class="text-xs mb-2"><strong>转多信号示例：</strong></p>
+                                    <pre class="text-xs bg-gray-800 text-green-400 p-2 rounded">🟢 正数占比多空转换预警！
+━━━━━━━━━━━━━━━━━━
+📊 转多信号
+━━━━━━━━━━━━━━━━━━
+📈 正数占比变化: 38.50% → 41.20%
+📉 方向: 上升
+🔀 状态转换: 🔴 空方 → 🟢 多方
+⚡ 阈值: 40.0%
+━━━━━━━━━━━━━━━━━━
+💡 操作建议: 逢低做多
+📊 数据详情:
+  • 正数时段: 45/109
+  • 正数时长: 45.0 分钟
+⏰ 检查时间: 2026-03-07 10:30:00</pre>
+                                </div>
+                            </div>
+
+                            <!-- 技术实现 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-purple-500">
+                                <h4 class="font-bold text-purple-800 mb-2">
+                                    <i class="fas fa-code mr-2"></i>
+                                    🔧 技术实现
+                                </h4>
+                                <div class="space-y-2 text-xs">
+                                    <div class="bg-purple-50 p-2 rounded">
+                                        <p class="font-bold text-purple-700 mb-1">监控脚本</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>文件：<code>scripts/positive_ratio_monitor.py</code></li>
+                                            <li>PM2服务：<code>positive-ratio-monitor</code>（ID: 43）</li>
+                                            <li>状态：online（自动重启）</li>
+                                            <li>内存：~7.3 MB</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-blue-50 p-2 rounded">
+                                        <p class="font-bold text-blue-700 mb-1">数据存储</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li><code>state.json</code>：当前状态（正数占比、多空状态）</li>
+                                            <li><code>alert_history.json</code>：报警历史（最多100条）</li>
+                                            <li>目录：<code>data/positive_ratio_monitor/</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 服务管理 -->
+                            <div class="bg-gradient-to-r from-indigo-100 to-purple-100 p-4 rounded-lg">
+                                <h4 class="font-bold text-indigo-800 mb-2">
+                                    <i class="fas fa-terminal mr-2"></i>
+                                    🖥️ 服务管理命令
+                                </h4>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <p class="font-semibold mb-1">查看状态：</p>
+                                        <code class="bg-gray-800 text-white px-2 py-1 rounded text-xs">pm2 status positive-ratio-monitor</code>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold mb-1">查看日志：</p>
+                                        <code class="bg-gray-800 text-white px-2 py-1 rounded text-xs">pm2 logs positive-ratio-monitor</code>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold mb-1">重启服务：</p>
+                                        <code class="bg-gray-800 text-white px-2 py-1 rounded text-xs">pm2 restart positive-ratio-monitor</code>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold mb-1">查看历史：</p>
+                                        <code class="bg-gray-800 text-white px-2 py-1 rounded text-xs">cat data/.../alert_history.json</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 部署信息 -->
+                            <div class="bg-gradient-to-r from-green-100 to-teal-100 p-4 rounded-lg">
+                                <h4 class="font-bold text-green-800 mb-2">
+                                    <i class="fas fa-rocket mr-2"></i>
+                                    🚀 部署信息
+                                </h4>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <p><strong>提交1：</strong><code>b964bf3</code>（监控系统）</p>
+                                        <p><strong>提交2：</strong><code>4369e85</code>（完整文档）</p>
+                                    </div>
+                                    <div>
+                                        <p><strong>更新时间：</strong>2026-03-07 02:25</p>
+                                        <p><strong>文档：</strong>POSITIVE_RATIO_MONITOR_GUIDE.md</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <!-- V3.11 (2026-03-06) - SAR日历选择器 -->
+                    <div class="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-6 shadow-md border-2 border-cyan-400">
+                        <h3 class="text-lg font-bold text-cyan-800 mb-4 border-b-2 border-cyan-500 pb-2">
+                            <i class="fas fa-calendar-alt text-cyan-600 mr-2"></i>
+                            📅 V3.11 SAR偏向趋势图 - 日历选择器 (2026-03-06)
+                        </h3>
+                        <div class="space-y-4 text-sm text-gray-700">
+                            
+                            <!-- 日历选择器功能 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-cyan-500">
+                                <h4 class="font-bold text-cyan-800 mb-2">
+                                    <i class="fas fa-calendar-check mr-2"></i>
+                                    📆 日历选择器功能
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-cyan-700">新增功能：</p>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs">
+                                        <li><strong>点击日期打开弹窗：</strong>点击页面顶部日期显示区域，弹出日历选择面板</li>
+                                        <li><strong>月视图日历：</strong>显示当月所有日期，可用日期蓝色高亮（#3B82F6）</li>
+                                        <li><strong>今日标记：</strong>今天的日期带青色边框（#06B6D4）便于识别</li>
+                                        <li><strong>月份导航：</strong>上下箭头切换月份，月份下拉框快速跳转</li>
+                                        <li><strong>快捷按钮：</strong>"今天" 按钮一键跳转到今日，"取消" 关闭弹窗</li>
+                                        <li><strong>数据范围：</strong>31个可用日期（2026-02-03 ~ 2026-03-06）</li>
+                                    </ul>
+                                    <div class="bg-cyan-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-cyan-800"><strong>💡 使用场景：</strong>不再需要一天一天点击"前一天"/"后一天"按钮，可以直接点击日历快速跳转到任意历史日期，大大提升查看历史数据的效率。</p>
+                                    </div>
+                                    <div class="bg-gray-100 p-3 rounded mt-2">
+                                        <p class="text-xs"><strong>🎨 UI设计：</strong></p>
+                                        <ul class="list-disc list-inside ml-4 text-xs space-y-0.5">
+                                            <li>弹窗居中显示，半透明黑色遮罩背景</li>
+                                            <li>日历表格 7x6 网格，周日到周六</li>
+                                            <li>可用日期：蓝色背景 + 白色文字</li>
+                                            <li>不可用日期：灰色文字，无法点击</li>
+                                            <li>今日标记：青色粗边框（3px）</li>
+                                            <li>鼠标悬停：可用日期变深蓝色</li>
+                                            <li>点击遮罩或"取消"按钮关闭弹窗</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 后端API -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-indigo-500">
+                                <h4 class="font-bold text-indigo-800 mb-2">
+                                    <i class="fas fa-server mr-2"></i>
+                                    🔌 后端API支持
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-indigo-700">新增端点：</p>
+                                    <div class="bg-gray-100 p-3 rounded">
+                                        <p class="text-xs"><code class="bg-gray-800 text-green-400 px-2 py-1 rounded">GET /api/sar-slope/available-dates</code></p>
+                                        <p class="text-xs mt-2"><strong>返回格式：</strong></p>
+                                        <pre class="text-xs mt-1 bg-gray-800 text-white p-2 rounded">{
+  "success": true,
+  "dates": ["2026-03-06", "2026-03-05", ...],
+  "count": 31
+}</pre>
+                                    </div>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs mt-2">
+                                        <li><strong>数据来源：</strong>扫描 <code>/data/sar_jsonl/{symbol}.jsonl</code> 文件获取时间戳</li>
+                                        <li><strong>优化策略：</strong>仅读取前3个币种（BTC/ETH/BNB）加速响应</li>
+                                        <li><strong>去重排序：</strong>自动去重并按日期倒序返回</li>
+                                        <li><strong>响应时间：</strong>约100-200ms</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- 技术实现 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-green-500">
+                                <h4 class="font-bold text-green-800 mb-2">
+                                    <i class="fas fa-code mr-2"></i>
+                                    🔧 技术实现细节
+                                </h4>
+                                <div class="space-y-2 text-xs">
+                                    <div class="bg-blue-50 p-2 rounded">
+                                        <p class="font-bold text-blue-700 mb-1">前端修改（sar_bias_trend.html）</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>第751-843行：日历弹窗HTML结构（模态框 + 日历表格 + 按钮）</li>
+                                            <li>第903-968行：CSS样式（弹窗、表格、高亮、动画）</li>
+                                            <li>第1783-1800行：<code>loadAvailableDates()</code> 函数加载可用日期</li>
+                                            <li>第1802-1871行：<code>openCalendar()</code> 生成日历视图</li>
+                                            <li>第1873-1925行：<code>renderCalendar()</code> 渲染月份日期</li>
+                                            <li>第1927-1940行：<code>selectDate()</code> 选择日期并加载数据</li>
+                                            <li>第1256行：初始化调用 <code>loadAvailableDates()</code></li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-purple-50 p-2 rounded mt-2">
+                                        <p class="font-bold text-purple-700 mb-1">后端修改（app.py）</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>第14716-14742行：新增 <code>/api/sar-slope/available-dates</code> 路由</li>
+                                            <li>扫描3个主要币种的JSONL文件（BTC/ETH/BNB）</li>
+                                            <li>提取所有 <code>beijing_time</code> 字段并格式化为 YYYY-MM-DD</li>
+                                            <li>使用 <code>set()</code> 去重，<code>sorted(..., reverse=True)</code> 倒序</li>
+                                            <li>返回JSON格式的日期列表及总数</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 部署信息 -->
+                            <div class="bg-gradient-to-r from-green-100 to-teal-100 p-4 rounded-lg">
+                                <h4 class="font-bold text-green-800 mb-2">
+                                    <i class="fas fa-rocket mr-2"></i>
+                                    🚀 部署信息
+                                </h4>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <p><strong>版本：</strong><code>v2.3-calendar</code></p>
+                                        <p><strong>提交1：</strong><code>5be6433</code>（日历功能）</p>
+                                        <p><strong>提交2：</strong><code>b17b29a</code>（推送GitHub）</p>
+                                    </div>
+                                    <div>
+                                        <p><strong>更新时间：</strong>2026-03-06 05:55</p>
+                                        <p><strong>页面访问：</strong><a href="/sar-bias-trend" class="text-blue-600 hover:underline">SAR偏向趋势图</a></p>
+                                        <p><strong>数据范围：</strong>31天（2026-02-03 ~ 2026-03-06）</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 使用指南 -->
+                            <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                                <h4 class="font-bold text-yellow-800 mb-2">
+                                    <i class="fas fa-book-open mr-2"></i>
+                                    📖 使用指南
+                                </h4>
+                                <ol class="list-decimal list-inside space-y-1 ml-4 text-xs">
+                                    <li>打开 <strong>SAR偏向趋势图</strong> 页面</li>
+                                    <li>点击页面顶部的 <strong>日期显示区域</strong>（例如 "2026-03-06"）</li>
+                                    <li>弹出日历选择面板，<strong>蓝色日期</strong>表示有数据可查看</li>
+                                    <li>点击任意蓝色日期，页面会自动加载该日期的SAR数据</li>
+                                    <li>使用 <strong>上/下箭头</strong> 或 <strong>月份下拉框</strong> 切换月份</li>
+                                    <li>点击 <strong>"今天"</strong> 按钮快速回到今日数据</li>
+                                    <li>点击 <strong>"取消"</strong> 或遮罩区域关闭弹窗</li>
+                                </ol>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <!-- V3.10 (2026-03-06) - 5分钟涨速监控 + 27币种完整性 -->
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 shadow-md border-2 border-purple-400">
+                        <h3 class="text-lg font-bold text-purple-800 mb-4 border-b-2 border-purple-500 pb-2">
+                            <i class="fas fa-bell text-purple-600 mr-2"></i>
+                            🚨 V3.10 5分钟涨速暴跌监控 + 27币种完整性保障 (2026-03-06)
+                        </h3>
+                        <div class="space-y-4 text-sm text-gray-700">
+                            
+                            <!-- 5分钟涨速监控 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-red-500">
+                                <h4 class="font-bold text-red-800 mb-2">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>
+                                    📉 5分钟涨速暴跌实时监控
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-red-700">监控功能：</p>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs">
+                                        <li><strong>触发阈值：</strong>最低5分钟涨速 < -30%（多头爆仓信号）</li>
+                                        <li><strong>检查频率：</strong>每30秒实时检测一次</li>
+                                        <li><strong>报警方式：</strong>Telegram发送3条消息（强调低吸机会）</li>
+                                        <li><strong>冷却机制：</strong>30分钟内不重复报警（防刷屏）</li>
+                                        <li><strong>数据来源：</strong><code>/api/coin-change-tracker/velocity-history</code></li>
+                                        <li><strong>历史记录：</strong>保存至 <code>data/five_min_speed_monitor/alert_history.json</code></li>
+                                    </ul>
+                                    <div class="bg-red-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-red-800"><strong>💡 使用场景：</strong>当5分钟涨速急速下跌至-30%以下时，说明大量多头爆仓，价格短期暴跌，此时是<span class="font-bold text-red-600">低吸抄底的黄金时机</span>。系统会立即发送3条Telegram提醒，确保不错过机会。</p>
+                                    </div>
+                                    <div class="bg-gray-100 p-3 rounded mt-2">
+                                        <p class="text-xs"><strong>📊 报警消息格式：</strong></p>
+                                        <pre class="text-xs mt-1 bg-gray-800 text-green-400 p-2 rounded">🚨 5分钟涨速暴跌预警！多头爆仓，低吸机会！
+━━━━━━━━━━━━━━━━━━
+📉 最低涨速: -32.45%
+📊 当前涨速: -15.23%
+📈 平均涨速: -18.67%
+🔝 最高涨速: -8.12%
+⚠️ 阈值: -30.0%
+━━━━━━━━━━━━━━━━━━
+⏰ 检查时间: 2026-03-06 18:05:50
+📅 数据时间: 2026-03-06 18:05:26
+📊 数据点数: 50</pre>
+                                    </div>
+                                    <p class="text-xs text-gray-600 mt-2">
+                                        <i class="fas fa-cog mr-1"></i>
+                                        <strong>服务管理：</strong> PM2服务名 <code>five-min-speed-crash-monitor</code>，自动重启，日志位于 <code>~/.pm2/logs/</code>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 27币种完整性保障 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-blue-500">
+                                <h4 class="font-bold text-blue-800 mb-2">
+                                    <i class="fas fa-shield-alt mr-2"></i>
+                                    🔒 27币种数据完整性强制校验
+                                </h4>
+                                <div class="space-y-2">
+                                    <p class="font-semibold text-blue-700">数据质量保障：</p>
+                                    <ul class="list-disc list-inside space-y-1 ml-4 text-xs">
+                                        <li><strong>强制要求：</strong>必须采集全部27个币种，缺一不可</li>
+                                        <li><strong>两层校验：</strong>
+                                            <ol class="list-decimal list-inside ml-4 mt-1">
+                                                <li>采集阶段：<code>current_prices</code> 必须包含27个币种</li>
+                                                <li>计算阶段：<code>changes</code> 字典必须包含27个币种</li>
+                                            </ol>
+                                        </li>
+                                        <li><strong>不完整处理：</strong>数据不足27个时，跳过保存，记录警告日志</li>
+                                        <li><strong>日志标识：</strong>✅ = 27/27完整数据；❌ = 数据不完整（已跳过）</li>
+                                        <li><strong>监控币种：</strong>
+                                            <div class="bg-gray-100 p-2 rounded mt-1">
+                                                <code class="text-xs">BTC, ETH, XRP, BNB, SOL, LTC, DOGE, SUI, TRX, TON, ETC, BCH, HBAR, XLM, FIL, LINK, CRO, DOT, AAVE, UNI, NEAR, APT, CFX, CRV, STX, LDO, TAO</code>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div class="bg-yellow-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-yellow-800"><strong>⚠️ 为什么必须27个？</strong></p>
+                                        <ul class="list-disc list-inside ml-4 mt-1 text-xs">
+                                            <li>币种缺失会导致涨跌幅计算失真</li>
+                                            <li>上涨币数/下跌币数统计错误</li>
+                                            <li>累计涨跌幅百分比不准确</li>
+                                            <li>影响预判信号的可靠性</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-green-50 p-3 rounded mt-2">
+                                        <p class="text-xs text-green-800"><strong>✅ 解决方案：</strong></p>
+                                        <ul class="list-disc list-inside ml-4 mt-1 text-xs">
+                                            <li>修正币种列表（移除MATIC，使用正确的27个币种）</li>
+                                            <li>添加双重完整性检查（采集+计算）</li>
+                                            <li>不完整数据不写入JSONL文件</li>
+                                            <li>详细日志记录缺失币种信息</li>
+                                            <li>自动重试机制（每分钟重新采集）</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 技术实现 -->
+                            <div class="bg-white p-4 rounded-lg border-l-4 border-indigo-500">
+                                <h4 class="font-bold text-indigo-800 mb-2">
+                                    <i class="fas fa-code mr-2"></i>
+                                    🔧 技术实现细节
+                                </h4>
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    <div class="bg-purple-50 p-2 rounded">
+                                        <p class="font-bold text-purple-700 mb-1">5分钟涨速监控</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>脚本：<code>five_min_speed_crash_monitor.py</code></li>
+                                            <li>PM2配置：<code>ecosystem.config.five_min_speed.js</code></li>
+                                            <li>服务ID：40（auto-restart）</li>
+                                            <li>提交：<code>2061e19</code></li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-blue-50 p-2 rounded">
+                                        <p class="font-bold text-blue-700 mb-1">27币种完整性</p>
+                                        <ul class="list-disc list-inside space-y-0.5">
+                                            <li>修改文件：<code>coin_change_tracker_collector.py</code></li>
+                                            <li>校验位置：L422-453（采集）+ L456-478（计算）</li>
+                                            <li>提交1：<code>186747b</code>（币种列表）</li>
+                                            <li>提交2：<code>cb9b526</code>（完整性检查）</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-100 p-3 rounded mt-3">
+                                    <p class="text-xs"><strong>📝 状态监控脚本：</strong></p>
+                                    <pre class="text-xs mt-1 bg-gray-800 text-white p-2 rounded">cd /home/user/webapp && ./scripts/check_coin_status.sh</pre>
+                                    <p class="text-xs mt-1 text-gray-600">显示：当前币种数、缺失币种、采集状态、最新数据时间</p>
+                                </div>
+                            </div>
+
+                            <!-- 部署信息 -->
+                            <div class="bg-gradient-to-r from-green-100 to-teal-100 p-4 rounded-lg">
+                                <h4 class="font-bold text-green-800 mb-2">
+                                    <i class="fas fa-rocket mr-2"></i>
+                                    🚀 部署信息
+                                </h4>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <p><strong>分支：</strong><code>deployment/complete-okx-trading-system</code></p>
+                                        <p><strong>最新提交：</strong><code>cb9b526</code></p>
+                                    </div>
+                                    <div>
+                                        <p><strong>更新时间：</strong>2026-03-06 18:05</p>
+                                        <p><strong>服务状态：</strong>PM2 39/39在线 + 监控服务</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                     
                     <!-- 最新修复 V3.6 (2026-02-28) -->
                     <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-6 shadow-md border-2 border-red-400">
@@ -3539,10 +3986,10 @@ pm2 status                                                # 查看所有进程�
                         <i class="fas fa-calendar-check mr-2"></i>
                         🔍 相似历史日期（最接近的前5天）
                     </span>
-                    <i id="similarDaysToggleIcon" class="fas fa-chevron-down text-green-600 transform transition-transform duration-300"></i>
+                    <i id="similarDaysToggleIcon" class="fas fa-chevron-down text-green-600 transform rotate-180 transition-transform duration-300"></i>
                 </button>
                 
-                <div id="similarDaysPanel" class="hidden p-4 bg-white">
+                <div id="similarDaysPanel" class="p-4 bg-white">
                     <div class="text-sm text-gray-600 mb-4">
                         <i class="fas fa-info-circle text-blue-600 mr-1"></i>
                         查找与当天颜色组合最接近的历史日期，按差值排序（差值 = |历史绿-当天绿| + |历史红-当天红| + |历史黄-当天黄| + |历史空白-当天空白|）
@@ -3958,10 +4405,10 @@ pm2 status                                                # 查看所有进程�
                     <span class="text-sm font-semibold text-indigo-800">
                         <i class="fas fa-info-circle mr-2"></i>📘 v2.1 模式触发条件详解
                     </span>
-                    <i id="intradayPatternInfoIcon" class="fas fa-chevron-down text-indigo-600 transition-transform"></i>
+                    <i id="intradayPatternInfoIcon" class="fas fa-chevron-down text-indigo-600 transform rotate-180 transition-transform"></i>
                 </button>
                 
-                <div id="intradayPatternInfoPanel" class="hidden mt-3 bg-white rounded-lg shadow-lg p-4 border border-indigo-100">
+                <div id="intradayPatternInfoPanel" class="mt-3 bg-white rounded-lg shadow-lg p-4 border border-indigo-100">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <!-- 情况1 -->
                         <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-500">
@@ -5271,6 +5718,9 @@ pm2 status                                                # 查看所有进程�
                         }
                     },
                     formatter: function(params) {
+                        // 🔥🔥🔥🔥🔥 VERSION CHECK V11 - TOOLTIP POSITIVE RATIO COMPLETE FIX
+                        console.log('%c🎯🎯🎯 Tooltip formatter版本: v3.9.2-ULTRA-V11-WITH-POSITIVE-RATIO 🎯🎯🎯', 'background: #10B981; color: white; font-size: 16px; font-weight: bold; padding: 8px;');
+                        
                         const time = params[0].axisValue;
                         let html = `<div style="padding: 8px; min-width: 240px;">`;
                         html += `<div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">`;
@@ -5308,23 +5758,72 @@ pm2 status                                                # 查看所有进程�
                                 html += `上涨占比: <span style="font-weight: 600; color: #10B981;">${upRatio}</span>`;
                                 html += `</div>`;
                                 
-                                // 🔥 添加正数占比统计（如果有数据）
-                                if (window.positiveRatioStats && window.positiveRatioStats.positive_ratio !== undefined) {
-                                    const positiveRatio = window.positiveRatioStats.positive_ratio;
-                                    const positiveCount = window.positiveRatioStats.positive_count;
-                                    const totalCount = window.positiveRatioStats.total_count;
+                                // 🔥 显示当前时间点的正数占比（从00:00到当前时间的累计占比）
+                                // 只匹配到分钟（HH:MM），忽略秒数
+                                const timeMinute = time.substring(0, 5);  // "01:46:12" -> "01:46"
+                                
+                                // 查找匹配的时间点（精确到分钟）
+                                let ratioData = null;
+                                if (window.positiveRatioHistory) {
+                                    // 优先精确匹配
+                                    if (window.positiveRatioHistory[time]) {
+                                        ratioData = window.positiveRatioHistory[time];
+                                    } else {
+                                        // 如果精确匹配失败，查找同一分钟的任意数据点
+                                        const matchingKey = Object.keys(window.positiveRatioHistory).find(key => key.startsWith(timeMinute));
+                                        if (matchingKey) {
+                                            ratioData = window.positiveRatioHistory[matchingKey];
+                                        }
+                                    }
+                                }
+                                
+                                console.log('🔍 Tooltip - 正数占比检查:', {
+                                    time: time,
+                                    timeMinute: timeMinute,
+                                    found: !!ratioData,
+                                    hasHistory: !!window.positiveRatioHistory,
+                                    dataCount: window.positiveRatioHistory ? Object.keys(window.positiveRatioHistory).length : 0
+                                });
+                                
+                                if (ratioData) {
+                                    console.log('  ✅ 找到正数占比数据:', {
+                                        ratio: ratioData.positive_ratio,
+                                        count: ratioData.positive_count,
+                                        total: ratioData.total_count
+                                    });
+                                    const positiveRatio = ratioData.positive_ratio;  // 累计正数占比
+                                    const positiveCount = ratioData.positive_count;   // 正数时段数
+                                    const totalCount = ratioData.total_count;         // 总时段数
+                                    const isPositive = ratioData.is_positive;         // 当前时刻是否为正
+                                    const totalChange = ratioData.total_change;       // 当前时刻的涨跌幅
+                                    
+                                    // 根据正数占比设置颜色
+                                    let ratioColor = '#EF4444';  // 红色（默认）
+                                    let ratioStatus = '大幅下跌';
+                                    if (positiveRatio > 60) {
+                                        ratioColor = '#10B981';  // 绿色
+                                        ratioStatus = '强势上涨';
+                                    } else if (positiveRatio > 50) {
+                                        ratioColor = '#3B82F6';  // 蓝色
+                                        ratioStatus = '偏多';
+                                    } else if (positiveRatio > 40) {
+                                        ratioColor = '#F59E0B';  // 橙色
+                                        ratioStatus = '偏空';
+                                    }
                                     
                                     html += `<div style="margin-top: 6px; padding: 6px; background: #F3F4F6; border-radius: 4px;">`;
                                     html += `<div style="font-size: 12px; color: #6B7280; margin-bottom: 2px;">`;
-                                    html += `<i class="fas fa-chart-line" style="margin-right: 4px;"></i>今日正数时段占比`;
+                                    html += `<i class="fas fa-chart-line" style="margin-right: 4px;"></i>正数时段占比`;
                                     html += `</div>`;
-                                    html += `<div style="font-size: 14px; font-weight: bold; color: ${positiveRatio > 50 ? '#10B981' : '#EF4444'};">`;
-                                    html += `${positiveRatio.toFixed(1)}%`;
+                                    html += `<div style="font-size: 14px; font-weight: bold; color: ${ratioColor};">`;
+                                    html += `${positiveRatio.toFixed(1)}% ${ratioStatus}`;
                                     html += `</div>`;
                                     html += `<div style="font-size: 11px; color: #9CA3AF; margin-top: 2px;">`;
-                                    html += `${positiveCount}/${totalCount} 数据点`;
+                                    html += `${positiveCount}/${totalCount} 时段`;
                                     html += `</div>`;
                                     html += `</div>`;
+                                } else {
+                                    console.log('  ❌ 未找到时间点数据');
                                 }
                             } else if (p.seriesName === 'RSI之和') {
                                 const rsiValue = p.value;
@@ -7142,12 +7641,17 @@ pm2 status                                                # 查看所有进程�
         
         // 🔥 新增：更新正数占比统计数据
         async function updatePositiveRatioStats(date = null) {
+            console.log('🔄 开始更新正数占比统计...', date ? `日期: ${date}` : '今天');
             try {
                 let url = `/api/coin-change-tracker/positive-ratio-stats?_t=${Date.now()}`;
                 if (date) {
-                    url += `&date=${formatDate(date)}`;
+                    // 如果date已经是字符串格式(YYYY-MM-DD)，直接使用；否则格式化
+                    const dateStr = (typeof date === 'string') ? date : formatDate(date);
+                    url += `&date=${dateStr}`;
+                    console.log('📅 使用日期参数:', dateStr);
                 }
                 
+                console.log('📡 正数占比API请求:', url);
                 const response = await fetch(url, {
                     cache: 'no-store',
                     headers: {
@@ -7157,6 +7661,7 @@ pm2 status                                                # 查看所有进程�
                     }
                 });
                 const result = await response.json();
+                console.log('📊 正数占比API响应:', result);
                 
                 if (result.success && result.stats) {
                     const stats = result.stats;
@@ -7164,7 +7669,12 @@ pm2 status                                                # 查看所有进程�
                     // 更新正数占比
                     const ratio = stats.positive_ratio;
                     const ratioEl = document.getElementById('positiveRatio');
+                    if (!ratioEl) {
+                        console.error('❌ 找不到正数占比元素 #positiveRatio');
+                        return;
+                    }
                     ratioEl.textContent = `${ratio.toFixed(1)}%`;
+                    console.log('✅ 正数占比主值已更新:', `${ratio.toFixed(1)}%`);
                     
                     // 根据占比设置颜色
                     let colorClass = 'text-purple-600';
@@ -7183,18 +7693,27 @@ pm2 status                                                # 查看所有进程�
                         statusText = '大幅下跌';
                     }
                     ratioEl.className = `text-3xl font-bold ${colorClass}`;
+                    console.log('✅ 正数占比颜色已更新:', colorClass, statusText);
                     
                     // 更新状态
-                    document.getElementById('positiveRatioStatus').textContent = statusText;
+                    const statusEl = document.getElementById('positiveRatioStatus');
+                    if (statusEl) {
+                        statusEl.textContent = statusText;
+                        console.log('✅ 正数占比状态已更新:', statusText);
+                    }
                     
                     // 更新时长
                     const duration = stats.positive_duration;
                     const durationText = duration >= 60 
                         ? `${(duration / 60).toFixed(1)}小时` 
                         : `${duration.toFixed(0)}分钟`;
-                    document.getElementById('positiveRatioDuration').textContent = `${stats.positive_count}/${stats.total_count} (${durationText})`;
+                    const durationEl = document.getElementById('positiveRatioDuration');
+                    if (durationEl) {
+                        durationEl.textContent = `${stats.positive_count}/${stats.total_count} (${durationText})`;
+                        console.log('✅ 正数占比时长已更新:', `${stats.positive_count}/${stats.total_count}`);
+                    }
                     
-                    console.log('✅ 正数占比统计更新成功:', stats);
+                    console.log('✅ 正数占比统计更新成功 - 完整数据:', stats);
                 } else {
                     console.warn('⚠️ 正数占比统计暂无数据:', result.error || result.message);
                 }
@@ -7231,7 +7750,7 @@ pm2 status                                                # 查看所有进程�
                 // 🚀 性能优化：启用lite模式，只返回必要字段，不返回27币详细数据
                 let url = '/api/coin-change-tracker/history?limit=1440&lite=true';
                 if (date) {
-                    url += `&date=${formatDate(date)}`;
+                    url += `&date=${currentDate}`;
                 }
                 
                 // 添加时间戳参数防止缓存
@@ -7298,7 +7817,7 @@ pm2 status                                                # 查看所有进程�
                             return null;
                         }),
                         // 2. RSI数据
-                        fetch(`/api/coin-change-tracker/rsi-history?limit=1440${date ? '&date=' + formatDate(date) : ''}&_t=${Date.now()}`, {
+                        fetch(`/api/coin-change-tracker/rsi-history?limit=1440${date ? '&date=' + currentDate : ''}&_t=${Date.now()}`, {
                             cache: 'no-store',
                             headers: {
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -7310,7 +7829,7 @@ pm2 status                                                # 查看所有进程�
                             return {success: false};
                         }),
                         // 3. Velocity数据
-                        fetch(`/api/coin-change-tracker/velocity-history?limit=1440${date ? '&date=' + formatDate(date) : ''}&_t=${Date.now()}`, {
+                        fetch(`/api/coin-change-tracker/velocity-history?limit=1440${date ? '&date=' + currentDate : ''}&_t=${Date.now()}`, {
                             cache: 'no-store',
                             headers: {
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -7322,7 +7841,7 @@ pm2 status                                                # 查看所有进程�
                             return {success: false};
                         }),
                         // 4. 波峰数据
-                        fetch(`/api/coin-change-tracker/wave-peaks?${date ? 'date=' + formatDate(date) + '&' : ''}_t=${Date.now()}`, {
+                        fetch(`/api/coin-change-tracker/wave-peaks?${date ? 'date=' + currentDate + '&' : ''}_t=${Date.now()}`, {
                             cache: 'no-store',
                             headers: {
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -7334,7 +7853,7 @@ pm2 status                                                # 查看所有进程�
                             return {success: false};
                         }),
                         // 5. 市场情绪数据
-                        fetch(`/api/coin-change-tracker/market-sentiment?${date ? 'date=' + formatDate(date) + '&' : ''}_t=${Date.now()}`, {
+                        fetch(`/api/coin-change-tracker/market-sentiment?${date ? 'date=' + currentDate + '&' : ''}_t=${Date.now()}`, {
                             cache: 'no-store',
                             headers: {
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -7357,8 +7876,8 @@ pm2 status                                                # 查看所有进程�
                             console.warn('日内模式数据加载失败:', e);
                             return {success: false};
                         }),
-                        // 7. 🔥 正数占比统计
-                        fetch(`/api/coin-change-tracker/positive-ratio-stats?${date ? 'date=' + formatDate(date) + '&' : ''}_t=${Date.now()}`, {
+                        // 7. 🔥 正数占比历史数据（用于tooltip显示）- 使用currentDate确保日期一致
+                        fetch(`/api/coin-change-tracker/positive-ratio-history?date=${currentDate}&_t=${Date.now()}`, {
                             cache: 'no-store',
                             headers: {
                                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -7366,8 +7885,8 @@ pm2 status                                                # 查看所有进程�
                                 'Expires': '0'
                             }
                         }).then(r => r.json()).catch(e => {
-                            console.warn('正数占比统计加载失败:', e);
-                            return {success: false};
+                            console.warn('正数占比历史数据加载失败:', e);
+                            return {success: false, data: []};
                         })
                     ]);
                     console.timeEnd('⚡ 并行数据加载');
@@ -7621,20 +8140,53 @@ pm2 status                                                # 查看所有进程�
                     
                     console.log('Velocity count:', velocityValues.length);
                     
-                    // 🔥 处理正数占比统计数据
+                    // 🔥 处理正数占比历史数据
+                    let positiveRatioHistoryMap = {};  // 按时间索引的正数占比数据
+                    let positiveRatioValues = [];      // 🔥 正数占比数据数组（用于透明虚线）
                     try {
-                        if (positiveRatioResult.success && positiveRatioResult.stats) {
-                            window.positiveRatioStats = positiveRatioResult.stats;
-                            console.log('✅ 正数占比统计加载成功:', positiveRatioResult.stats);
-                            console.log(`   - 正数占比: ${positiveRatioResult.stats.positive_ratio}%`);
-                            console.log(`   - 正数时段: ${positiveRatioResult.stats.positive_count}/${positiveRatioResult.stats.total_count}`);
+                        if (positiveRatioResult.success && positiveRatioResult.data) {
+                            // 将数组转换为按时间索引的对象，方便tooltip查找
+                            positiveRatioResult.data.forEach(item => {
+                                positiveRatioHistoryMap[item.time] = {
+                                    total_change: item.total_change,
+                                    is_positive: item.is_positive,
+                                    positive_ratio: item.positive_ratio,      // 🔥 累计正数占比
+                                    positive_count: item.positive_count,       // 🔥 正数时段数
+                                    total_count: item.total_count              // 🔥 总时段数
+                                };
+                            });
+                            window.positiveRatioHistory = positiveRatioHistoryMap;
+                            
+                            // 🔥 创建正数占比数值数组，与times时间轴对齐
+                            positiveRatioValues = times.map(time => {
+                                // 精确匹配
+                                if (positiveRatioHistoryMap[time]) {
+                                    return positiveRatioHistoryMap[time].positive_ratio;
+                                }
+                                // 分钟匹配
+                                const timeMinute = time.substring(0, 5);
+                                const matchingKey = Object.keys(positiveRatioHistoryMap).find(k => k.startsWith(timeMinute));
+                                if (matchingKey) {
+                                    return positiveRatioHistoryMap[matchingKey].positive_ratio;
+                                }
+                                return null;  // 没有匹配的数据
+                            });
+                            
+                            console.log('✅ 正数占比历史数据加载成功:', {
+                                count: positiveRatioResult.data.length,
+                                sample: positiveRatioResult.data.slice(0, 3),
+                                valuesCount: positiveRatioValues.length,
+                                valuesSample: positiveRatioValues.slice(0, 5)
+                            });
                         } else {
-                            window.positiveRatioStats = null;
-                            console.log('⚠️ 正数占比统计暂无数据');
+                            window.positiveRatioHistory = {};
+                            positiveRatioValues = times.map(() => null);
+                            console.log('⚠️ 正数占比历史数据暂无数据');
                         }
                     } catch (e) {
-                        console.warn('⚠️ 正数占比统计加载失败:', e);
-                        window.positiveRatioStats = null;
+                        console.warn('⚠️ 正数占比历史数据处理失败:', e);
+                        window.positiveRatioHistory = {};
+                        positiveRatioValues = times.map(() => null);
                     }
                     
                     // 🚀 处理并行加载的波峰数据
@@ -7935,6 +8487,57 @@ pm2 status                                                # 查看所有进程�
                                         <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-top: 4px;">
                                             <span style="color: #6B7280;">波动状态:</span>
                                             <span style="font-weight: 600; color: ${velocityStatusColor};">${velocityStatus}</span>
+                                        </div>
+                                    </div>`;
+                                }
+                                
+                                // 🔥🔥🔥 显示正数占比数据（从透明虚线series获取）
+                                const positiveRatioParam = params.find(p => p.seriesName === '正数时段占比');
+                                if (positiveRatioParam && positiveRatioParam.value !== null && positiveRatioParam.value !== undefined) {
+                                    const positiveRatio = positiveRatioParam.value;
+                                    
+                                    // 根据正数占比设置颜色和状态
+                                    let ratioColor = '#EF4444';  // 红色（默认）
+                                    let ratioStatus = '大幅下跌';
+                                    if (positiveRatio > 60) {
+                                        ratioColor = '#10B981';  // 绿色
+                                        ratioStatus = '强势上涨';
+                                    } else if (positiveRatio > 50) {
+                                        ratioColor = '#3B82F6';  // 蓝色
+                                        ratioStatus = '偏多';
+                                    } else if (positiveRatio > 40) {
+                                        ratioColor = '#F59E0B';  // 橙色
+                                        ratioStatus = '偏空';
+                                    }
+                                    
+                                    // 从window.positiveRatioHistory获取详细数据
+                                    let positiveCount = '--';
+                                    let totalCount = '--';
+                                    if (window.positiveRatioHistory) {
+                                        const timeMinute = time.substring(0, 5);
+                                        let ratioData = window.positiveRatioHistory[time];
+                                        if (!ratioData) {
+                                            const matchingKey = Object.keys(window.positiveRatioHistory).find(k => k.startsWith(timeMinute));
+                                            if (matchingKey) {
+                                                ratioData = window.positiveRatioHistory[matchingKey];
+                                            }
+                                        }
+                                        if (ratioData) {
+                                            positiveCount = ratioData.positive_count;
+                                            totalCount = ratioData.total_count;
+                                        }
+                                    }
+                                    
+                                    html += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #E5E7EB;">
+                                        <div style="margin-bottom: 4px;">
+                                            <i class="fas fa-chart-line" style="margin-right: 4px; color: ${ratioColor};"></i><span style="font-weight: 600; color: ${ratioColor};">正数时段占比</span>
+                                        </div>
+                                        <div style="font-size: 14px; font-weight: bold; color: ${ratioColor};">
+                                            ${positiveRatio.toFixed(1)}% ${ratioStatus}
+                                        </div>
+                                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-top: 4px;">
+                                            <span style="color: #6B7280;">时段统计:</span>
+                                            <span style="font-weight: 600;">${positiveCount}/${totalCount} 时段</span>
                                         </div>
                                     </div>`;
                                 }
@@ -8761,6 +9364,112 @@ pm2 status                                                # 查看所有进程�
                                     shadowBlur: 10,
                                     shadowColor: 'rgba(249, 115, 22, 0.5)'
                                 }
+                            },
+                            // 🔥 新增：标记最高和最低涨速点
+                            markPoint: {
+                                data: (function() {
+                                    const marks = [];
+                                    
+                                    // 只有当有涨速数据时才添加标记
+                                    if (velocityValues && velocityValues.length > 0 && window.velocityStatsForChart) {
+                                        const stats = window.velocityStatsForChart;
+                                        
+                                        // 找到最高涨速的索引
+                                        if (stats.max !== null) {
+                                            const maxIndex = velocityValues.findIndex(v => v === stats.max);
+                                            if (maxIndex >= 0) {
+                                                marks.push({
+                                                    name: '最高涨速',
+                                                    coord: [maxIndex, stats.max],
+                                                    value: stats.max.toFixed(2) + '%',
+                                                    symbol: 'pin',
+                                                    symbolSize: 50,
+                                                    itemStyle: {
+                                                        color: '#10B981'  // 绿色
+                                                    },
+                                                    label: {
+                                                        show: true,
+                                                        position: 'top',
+                                                        formatter: '最高\n{c}%',
+                                                        fontSize: 11,
+                                                        fontWeight: 'bold',
+                                                        color: '#10B981',
+                                                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                                        padding: [4, 8],
+                                                        borderRadius: 4,
+                                                        borderColor: '#10B981',
+                                                        borderWidth: 1
+                                                    }
+                                                });
+                                            }
+                                        }
+                                        
+                                        // 找到最低涨速的索引
+                                        if (stats.min !== null) {
+                                            const minIndex = velocityValues.findIndex(v => v === stats.min);
+                                            if (minIndex >= 0) {
+                                                marks.push({
+                                                    name: '最低涨速',
+                                                    coord: [minIndex, stats.min],
+                                                    value: stats.min.toFixed(2) + '%',
+                                                    symbol: 'pin',
+                                                    symbolSize: 50,
+                                                    itemStyle: {
+                                                        color: '#EF4444'  // 红色
+                                                    },
+                                                    label: {
+                                                        show: true,
+                                                        position: 'bottom',
+                                                        formatter: '最低\n{c}%',
+                                                        fontSize: 11,
+                                                        fontWeight: 'bold',
+                                                        color: '#EF4444',
+                                                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                                        padding: [4, 8],
+                                                        borderRadius: 4,
+                                                        borderColor: '#EF4444',
+                                                        borderWidth: 1
+                                                    }
+                                                });
+                                            }
+                                        }
+                                        
+                                        console.log('📌 涨速标记点:', {
+                                            markCount: marks.length,
+                                            max: stats.max,
+                                            min: stats.min,
+                                            marks: marks
+                                        });
+                                    }
+                                    
+                                    return marks;
+                                })()
+                            }
+                        },
+                        // 🔥🔥🔥 新增：正数占比透明虚线（仅用于tooltip显示，不可见）
+                        {
+                            id: 'positive-ratio-line',
+                            name: '正数时段占比',
+                            type: 'line',
+                            yAxisIndex: 0,  // 使用左侧Y轴（与涨跌幅共用，但数值范围0-100）
+                            smooth: false,
+                            data: positiveRatioValues.length > 0 ? positiveRatioValues : [],
+                            lineStyle: {
+                                width: 0,  // 线宽为0，完全不可见
+                                type: 'dashed',
+                                color: 'rgba(0,0,0,0)',  // 完全透明
+                                opacity: 0
+                            },
+                            itemStyle: {
+                                color: 'rgba(0,0,0,0)',  // 完全透明
+                                opacity: 0
+                            },
+                            showSymbol: false,  // 不显示数据点
+                            connectNulls: true,
+                            silent: true,  // 不响应鼠标事件
+                            z: 0,  // 最低层级
+                            emphasis: {
+                                disabled: true  // 禁用高亮
                             }
                         },
                         // 独立的市场情绪信号系列（不受图例切换影响）
